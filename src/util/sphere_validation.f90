@@ -22,7 +22,8 @@ program main
     allocate(node(3, nnode), Source = 0.0d0)
     allocate(nid(nnode), Source = 0)
     do i = 1, nnode
-      read(10,*)nid(i), node(1,i), node(2,i), node(3,i)
+      nid(i) = 1
+      read(10,*)node(1,i), node(2,i), node(3,i)
     enddo
   close(10)
 
@@ -30,17 +31,17 @@ program main
     read(10,*) nelem
     allocate(elem(8, nelem), Source = 0)
     do i = 1, nelem
-      read(10,*)in, elem(1,i), elem(2,i), elem(3,i), elem(4,i), &
+      read(10,*)elem(1,i), elem(2,i), elem(3,i), elem(4,i), &
                   & elem(5,i), elem(6,i), elem(7,i), elem(8,i)
     enddo
   close(10)
 
-  open(10, file="u.dat", status='old')
+  open(10, file="visual/u.dat", status='old')
     read(10,*) in
     if(in /= nnode) stop "error"
     allocate(u(3, nnode), Source = 0.0d0)
     do i = 1, nnode
-      read(10,*)in, u(1,i), u(2,i), u(3,i)
+      read(10,*)u(1,i), u(2,i), u(3,i)
     enddo
   close(10)
 
