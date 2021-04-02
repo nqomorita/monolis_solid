@@ -16,7 +16,7 @@ contains
 
     call soild_debug_header("get_stiff_matrix")
 
-    do icel = 1,mesh%nelem
+    do icel = 1, mesh%nelem
       call get_element_node_id(icel, mesh%elem, elem)
       call get_element_node(elem, mesh%node, x)
       call C3D8_stiff(mesh, var, param, icel, x, stiff)

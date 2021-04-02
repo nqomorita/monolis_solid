@@ -1,7 +1,7 @@
 
 FC       = mpif90
-#FFLAGS   = -O3 -mtune=native -march=native -mfpmath=both
-FFLAGS   = -O2 -fbounds-check -fbacktrace -Wuninitialized -ffpe-trap=invalid,zero,overflow
+FFLAGS   = -O3 -mtune=native -march=native -mfpmath=both
+#FFLAGS   = -O2 -fbounds-check -fbacktrace -Wuninitialized -ffpe-trap=invalid,zero,overflow
 LDFLAGS  =
 CPP       = -cpp
 
@@ -11,13 +11,13 @@ METIS_INC  =
 METIS_LIB  = -L$(METIS_DIR)/lib -lmetis
 
 # mumps library
-MUMPS_DIR  =  /Users/morita/git/MUMPS
+MUMPS_DIR  = /Users/morita/git/MUMPS
 MUMPS_INC  = -I $(MUMPS_DIR)/include
-MUMPS_LIB  = -L$(MUMPS_DIR)/lib -lpord -lmumps_common -ldmumps -L/usr/local/lib -lscalapack -L/usr/local/Cellar/openblas/0.3.13/lib  -lopenblas
+MUMPS_LIB  = -L$(MUMPS_DIR)/lib -lpord -lmumps_common -ldmumps
+#-L/usr/local/lib -lscalapack -L/usr/local/Cellar/openblas/0.3.13/lib  -lopenblas
 
 # monolis library
-MONOLIS_DIR= /Users/morita/ricos/2021/seepage_flow_matsuda_lab/submodule/monolis
-#/Users/morita/git/monolis
+MONOLIS_DIR= ./submodule/monolis
 MONOLIS_INC= -I $(MONOLIS_DIR)/include
 MONOLIS_LIB= -L$(MONOLIS_DIR)/lib -lmonolis
 

@@ -28,16 +28,16 @@ contains
 
     call soild_debug_header("soild_input_mesh")
 
-    call modify_finename("node.dat", fname)
+    fname = monolis_get_input_filename("node.dat")
     call monolis_input_mesh_node(fname, mesh%nnode, mesh%node)
 
-    call modify_finename("elem.dat", fname)
+    fname = monolis_get_input_filename("elem.dat")
     call monolis_input_mesh_elem(fname, mesh%nelem, mesh%nbase_func, mesh%elem)
 
-    call modify_finename("bc.dat", fname)
+    fname = monolis_get_input_filename("bc.dat")
     call monolis_input_condition(fname, param%nbound, ndof, param%ibound, param%bound)
 
-    call modify_finename("load.dat", fname)
+    fname = monolis_get_input_filename("load.dat")
     call monolis_input_condition(fname, param%ncload, ndof, param%icload, param%cload)
 
     !call soild_debug_int("nnode", mesh%nnode)
@@ -45,20 +45,6 @@ contains
     !call soild_debug_int("nbound", param%nbound)
     !call soild_debug_int("ncload", param%ncload)
   end subroutine soild_input_mesh
-
-  subroutine modify_finename(fname_in, fname)
-    implicit none
-    character(*) :: fname_in
-    character :: fname*100, cnum*5, output_dir*8
-
-    if(monolis_global_commsize() > 1)then
-       output_dir = "parted/"
-       write(cnum,"(i0)") monolis_global_myrank()
-      fname = trim(output_dir)//trim(fname_in)//"."//trim(cnum)
-    else
-      fname = trim(fname_in)
-    endif
-  end subroutine modify_finename
 
   subroutine outout_res(mesh, param, var)
     implicit none
