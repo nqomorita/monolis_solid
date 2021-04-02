@@ -22,7 +22,7 @@ program main
     allocate(node(3, nnode), Source = 0.0d0)
     allocate(nid(nnode), Source = 0)
     do i = 1, nnode
-      nid(i) = 1
+      nid(i) = i
       read(10,*)node(1,i), node(2,i), node(3,i)
     enddo
   close(10)
