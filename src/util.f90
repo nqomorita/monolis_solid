@@ -122,4 +122,27 @@ contains
     smises = 0.5d0 * ((s11-ps)**2 + (s22-ps)**2 + (s33-ps)**2) + s12**2 + s23**2 + s13**2
     mises  = dsqrt( 3.0d0 * smises )
   end subroutine get_mises
+
+  subroutine get_element_node_id(eid, elem, elemid)
+    implicit none
+    integer(kint) :: i, eid, elem(:,:), elemid(:)
+    do i = 1, 8
+      elemid(i) = elem(i,eid)
+    enddo
+  end subroutine get_element_node_id
+
+  subroutine get_element_node(elem, node, x)
+    implicit none
+    integer(kint) :: i, in, j, elem(:)
+    real(kdouble) :: node(:,:), x(:,:)
+
+    do i = 1, 8
+      in = elem(i)
+      do j = 1, ndof
+        x(1,i) = node(1,in)
+        x(2,i) = node(2,in)
+        x(3,i) = node(3,in)
+      enddo
+    enddo
+  end subroutine get_element_node
 end module mod_soild_util

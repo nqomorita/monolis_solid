@@ -12,12 +12,7 @@ contains
     integer(kint) :: i
 
     call soild_debug_header("delta_u_update")
-
-    do i = 1, mesh%nnode
-      var%du(3*i-2) = var%du(3*i-2) + var%X(3*i-2)
-      var%du(3*i-1) = var%du(3*i-1) + var%X(3*i-1)
-      var%du(3*i  ) = var%du(3*i  ) + var%X(3*i  )
-    enddo
+    var%du = var%du + var%X
   end subroutine delta_u_update
 
   subroutine u_update(mesh, var)
@@ -27,12 +22,7 @@ contains
     integer(kint) :: i
 
     call soild_debug_header("u_update")
-
-    do i = 1, mesh%nnode
-      var%u(3*i-2) = var%u(3*i-2) + var%du(3*i-2)
-      var%u(3*i-1) = var%u(3*i-1) + var%du(3*i-1)
-      var%u(3*i  ) = var%u(3*i  ) + var%du(3*i  )
-    enddo
+    var%u = var%u + var%du
   end subroutine u_update
 
   subroutine stress_update(mesh, var, param)

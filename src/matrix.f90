@@ -12,15 +12,14 @@ contains
     type(paramdef) :: param
     integer(kint) :: i, icel
     integer(kint) :: elem(8)
-    real(kdouble) :: stiff(24,24)
+    real(kdouble) :: stiff(24,24), x(3,8)
 
     call soild_debug_header("get_stiff_matrix")
 
     do icel = 1,mesh%nelem
-      do i = 1, 8
-        elem(i) = mesh%elem(i, icel)
-      enddo
-      call C3D8_stiff(mesh, var, param, icel, elem, stiff)
+      call get_element_node_id(icel, mesh%elem, elem)
+      call get_element_node(elem, mesh%node, x)
+      call C3D8_stiff(mesh, var, param, icel, x, stiff)
       call monolis_add_matrix_to_sparse_matrix(mat, 8, elem, stiff)
     enddo
   end subroutine get_stiff_matrix
@@ -33,11 +32,10 @@ contains
     real(kdouble) :: val
 
     call soild_debug_header("load_condition")
+
     var%f = 0.0d0
     do i = 1, param%ncload
-      in  = param%icload(1, i)
-      if(in == -1) cycle
-
+      in = param%icload(1, i)
       dof = param%icload(2, i)
       val = param%cload(i)
       if(ndof < dof) stop "*** error: 3 < dof"
@@ -49,15 +47,10 @@ contains
     implicit none
     type(meshdef) :: mesh
     type(vardef) :: var
-    integer(kint) :: i
 
     call soild_debug_header("get_RHS")
 
-    do i = 1, mesh%nnode
-      var%B(3*i-2) = var%f(3*i-2) - var%q(3*i-2)
-      var%B(3*i-1) = var%f(3*i-1) - var%q(3*i-1)
-      var%B(3*i  ) = var%f(3*i  ) - var%q(3*i  )
-    enddo
+    var%B = var%f - var%q
   end subroutine get_RHS
 
   subroutine bound_condition(mesh, param, var)
@@ -65,28 +58,18 @@ contains
     type(meshdef) :: mesh
     type(paramdef) :: param
     type(vardef) :: var
-    integer(kint) :: i, in, k, kS, kE, idof, nb
+    integer(kint) :: i, in, dof, nb
     integer(kint), allocatable :: indexR(:), itemR(:), permA(:)
-    real(kdouble) :: val, tmp
+    real(kdouble) :: val
 
     call soild_debug_header("bound_condition")
 
     do nb = 1, param%nbound
-!      in  = param%ibound(1, nb)
-!      if(in == -1) cycle
-!      idof = param%ibound(2, nb)
-!      tmp = param%bound(nb)
-!      if(idof < 0 .or. 3 < idof) stop "*** error: 3 < dof"
-!      if(idof == 0)then
-!        kS = 1; kE = 3
-!      else
-!        kS = idof; kE = idof
-!      endif
-
-!      do k = kS, kE
-!        val = tmp - var%u(3*in-3+k) - var%du(3*in-3+k)
-!        call monolis_set_Dirichlet_bc(mat, var%B, in, k, val)
-!      enddo
+      in  = param%ibound(1, nb)
+      dof = param%ibound(2, nb)
+      val = param%bound(nb) - var%u(ndof*(in-1) + dof) - var%du(ndof*(in-1) + dof)
+      if(ndof < dof) stop "*** error: 3 < dof"
+      call monolis_set_Dirichlet_bc(mat, var%B, in, dof, val)
     enddo
   end subroutine bound_condition
 end module mod_soild_matrix
