@@ -21,14 +21,14 @@ contains
     implicit none
     character(*) :: header
 
-    if(myrank == 0) write(*,"(a)")"* "//trim(header)
+    if(monolis_global_myrank() == 0) write(*,"(a)")"* "//trim(header)
   end subroutine soild_write_header
 
   subroutine soild_debug_header(header)
     implicit none
     character(*) :: header
 
-    if(myrank == 0)then
+    if(monolis_global_myrank() == 0)then
       write(*,"(a)")"** soild debug: "//trim(header)
     endif
   end subroutine soild_debug_header
@@ -38,7 +38,7 @@ contains
     integer(kint) :: n
     character(*) :: header
 
-    if(myrank == 0) write(*,"(a,i12)")"** soild debug: "//trim(header)//": ", n
+    if(monolis_global_myrank() == 0) write(*,"(a,i12)")"** soild debug: "//trim(header)//": ", n
   end subroutine soild_debug_int
 
   subroutine soild_debug_real(header, r)
@@ -46,14 +46,14 @@ contains
     real(kdouble) :: r
     character(*) :: header
 
-    if(myrank == 0) write(*,"(a,1pe12.5)")"** soild debug: "//trim(header)//": ", r
+    if(monolis_global_myrank() == 0) write(*,"(a,1pe12.5)")"** soild debug: "//trim(header)//": ", r
   end subroutine soild_debug_real
 
   subroutine soild_debug_char(header, char)
     implicit none
     character(*) :: header, char
 
-    if(myrank == 0) write(*,"(a,a)")"** soild debug: "//trim(header)//": ", trim(char)
+    if(monolis_global_myrank() == 0) write(*,"(a,a)")"** soild debug: "//trim(header)//": ", trim(char)
   end subroutine soild_debug_char
 
   subroutine soild_debug_logical(header, l)
@@ -61,14 +61,14 @@ contains
     logical :: l
     character(*) :: header
 
-    if(myrank == 0) write(*,"(a,l)")"** soild debug: "//trim(header)//": ", l
+    if(monolis_global_myrank() == 0) write(*,"(a,l)")"** soild debug: "//trim(header)//": ", l
   end subroutine soild_debug_logical
 
   subroutine soild_debug_time(step, time)
     implicit none
     integer(kint) :: step
     real(kdouble) :: time
-    if(myrank == 0)then
+    if(monolis_global_myrank() == 0)then
       write(*,"(a,i8,1pe12.5)")"* current time step: ", step, time
       !write(flog,"(a,i8,1pe12.5)")"* current time step: ", step, time
     endif
@@ -79,7 +79,7 @@ contains
     real(kdouble) :: time
     character(*) :: header
 
-    if(myrank == 0)then
+    if(monolis_global_myrank() == 0)then
       write(*,"(a,1pe10.3,a)")"  - "//trim(header)//" elapse time: ", time, " [sec]"
       !write(flog,"(a,1pe10.3,a)")"  - "//trim(header)//" elapse time: ", time, " [sec]"
     endif

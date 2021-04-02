@@ -206,21 +206,9 @@ contains
 
       stress = matmul(D, strain)
 
-!      call get_mises(stress(1:6), mises)
-!      plstrain = var%gauss(i,icel)%equival
-
-!      Yield0 = 200.d0
-!      if(mises > Yield0) then
-!        !call BackwardEuler( param, var, mises, stress, Yield0, plstrain, PPStrain, ystress )
-!        !var%gauss(i,icel)%strain = plstrain
-!        var%gauss(i,icel)%stress = ystress
-!        var%gauss(i,icel)%equival = plstrain
-!        q = q + matmul(ystress, B) * det
-!      else
-        var%gauss(i,icel)%strain = strain
-        var%gauss(i,icel)%stress = stress
-        q = q + matmul(stress, B)*det
-!      endif
+      var%gauss(i,icel)%strain = strain
+      var%gauss(i,icel)%stress = stress
+      q = q + matmul(stress, B)*det
     enddo
   end subroutine C3D8_update
 
@@ -255,69 +243,4 @@ contains
     estrain = estrain/8.0d0
     estress = estress/8.0d0
   end subroutine C3D8_get_nodal_values
-
-  subroutine BackwardEuler(mises, stress, param, var, YIeld0, plstrain, PPStrain, ystress)
-    type(paramdef) :: param
-    type(vardef) :: var
-    real(kdouble) :: stress(6), ystress(6)   !< trial->real stress
-    !real(=kreal)   :: plstrain    !< plastic strain till current substep
-    !integer, intent(inout)           :: istat       !< plastic state
-    real(kdouble), parameter :: tol = 1.d-3
-    integer, parameter :: MAXITER = 15
-    real(kdouble) :: dlambda, f, mises
-    integer(kint) :: i, j
-    real(kdouble) :: youngs, poisson, plstrain, dum
-    real(kdouble) :: J1, J2, J3, H, dd, G, K, devia(6)
-    real(kdouble) :: PPStrain(6)
-
-    youngs = param%E
-    poisson = param%mu
-
-    f = 0.0d0
-    dum = YIeld0
-    J1 = (stress(1) + stress(2) + stress(3))/3.0d0
-    devia(1:3) = stress(1:3) - J1
-    devia(4:6) = stress(4:6)
-
-    if(youngs == 0.0d0) stop "YOUNG's ratio==0"
-    G = youngs/(2.0d0*(1.0d0 + poisson))
-    K = youngs/(3.0d0*(1.0d0 - 2.0d0*poisson))
-    dlambda = 0.0d0
-
-    !> Mises or. Isotropic
-    do i = 1, MAXITER
-      !> H should be given in a tabulated way
-      ! H= calHardenCoeff( matl, pstrain+dlambda )
-      H = 200.0d0
-      f = mises - 3.0d0*G*dlambda - dum
-      dd = 3.d0*G + H
-      dlambda = dlambda + f/dd
-      !dum = calCurrYield(plstrain + dlambda, YIeld0)
-
-      if(dabs(f) < tol*tol) exit
-    enddo
-
-    !> Update equivalent plastic strain and stress
-    plstrain = plstrain + dlambda
-
-    !> Update strain components
-    PPStrain(1:3) = PPStrain(1:3) + 1.5d0*dlambda*devia(1:3)/mises
-    PPStrain(4:6) = PPStrain(4:6) + 3.0d0*dlambda*devia(4:6)/mises
-
-    !>Update stress
-    devia(:) = dum/mises*devia(:)
-    ystress(1:3) = devia(1:3) + J1
-    ystress(4:6) = devia(4:6)
-  end subroutine BackwardEuler
-
-  !> This function calcualtes current yield stress
-  function calCurrYield(plstrain, YIeld0)
-    real(kdouble), intent(in) :: plstrain !< plastic strain
-    real(kdouble), intent(in) :: YIeld0   !< plastic strain
-    real(kdouble) :: calCurrYield
-
-    calCurrYield = - 1.0d0
-    !> Linear hardening,
-    calCurrYield = YIeld0 + 200.0d0*plstrain
-  end function
 end module mod_soild_c3d8

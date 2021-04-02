@@ -13,23 +13,22 @@ contains
 
     call soild_debug_header("solver")
 
-    monolis%PRM%maxiter = 1
-    monolis%PRM%precond = monolis_prec_MUMPS
-    !monolis%PRM%precond = monolis_prec_SOR
-    monolis%PRM%tol = 1.0d-8
-    monolis%PRM%is_scaling = .false.
-    monolis%PRM%is_reordering = .false.
-    monolis%PRM%is_init_x = .true.
-    monolis%PRM%is_debug = .false.
-    monolis%PRM%show_summary = .true.
-    monolis%PRM%show_time = .true.
-    monolis%PRM%show_iterlog = .false.
+    call monolis_param_set_method(mat, monolis_iter_CG)
+    call monolis_param_set_precond(mat, monolis_prec_MUMPS)
+    call monolis_param_set_maxiter(mat, 100000)
+    call monolis_param_set_tol(mat, 1.0d-6)
+    call monolis_param_set_is_scaling(mat, .false.)
+    call monolis_param_set_is_reordering(mat, .false.)
+    call monolis_param_set_is_debug(mat, .false.)
+    call monolis_param_set_show_time(mat, .false.)
+    call monolis_param_set_show_iterlog(mat, .false.)
+    call monolis_param_set_show_summary(mat, .true.)
 
-    call monolis_solve(monolis, var%B, var%X)
-    call soild_plot_solver(monolis%PRM%curiter, monolis%PRM%curresid)
+    call monolis_solve(mat, var%B, var%X)
+    call soild_plot_solver(mat%PRM%curiter, mat%PRM%curresid)
 
-    if(monolis%PRM%curresid > monolis%PRM%tol)then
-      if(monolis%COM%myrank == 0) write(*,"(a)") "*** ERROR: monolis solver is not converge"
+    if(mat%PRM%curresid > mat%PRM%tol)then
+      if(mat%COM%myrank == 0) write(*,"(a)") "*** ERROR: monolis solver is not converge"
       stop
     endif
   end subroutine solver
@@ -49,7 +48,7 @@ contains
 
     bnrm = 0.0d0
     rnrm = 0.0d0
-    call monolis_inner_product_R(monolis%COM, mesh%nnode, ndof, var%B, var%B, bnrm)
+    call monolis_inner_product_R(mat%COM, mesh%nnode, ndof, var%B, var%B, bnrm)
     bnrm = bnrm
 
     if(step == 1)then

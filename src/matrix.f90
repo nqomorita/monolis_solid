@@ -21,7 +21,7 @@ contains
         elem(i) = mesh%elem(i, icel)
       enddo
       call C3D8_stiff(mesh, var, param, icel, elem, stiff)
-      call monolis_add_matrix_to_sparse_matrix(monolis, 8, elem, stiff)
+      call monolis_add_matrix_to_sparse_matrix(mat, 8, elem, stiff)
     enddo
   end subroutine get_stiff_matrix
 
@@ -72,23 +72,21 @@ contains
     call soild_debug_header("bound_condition")
 
     do nb = 1, param%nbound
-      in  = param%ibound(1, nb)
-      if(in == -1) cycle
+!      in  = param%ibound(1, nb)
+!      if(in == -1) cycle
+!      idof = param%ibound(2, nb)
+!      tmp = param%bound(nb)
+!      if(idof < 0 .or. 3 < idof) stop "*** error: 3 < dof"
+!      if(idof == 0)then
+!        kS = 1; kE = 3
+!      else
+!        kS = idof; kE = idof
+!      endif
 
-      idof = param%ibound(2, nb)
-      tmp = param%bound(nb)
-
-      if(idof < 0 .or. 3 < idof) stop "*** error: 3 < dof"
-      if(idof == 0)then
-        kS = 1; kE = 3
-      else
-        kS = idof; kE = idof
-      endif
-
-      do k = kS, kE
-        val = tmp - var%u(3*in-3+k) - var%du(3*in-3+k)
-        call monolis_set_Dirichlet_bc(monolis, var%B, in, k, val)
-      enddo
+!      do k = kS, kE
+!        val = tmp - var%u(3*in-3+k) - var%du(3*in-3+k)
+!        call monolis_set_Dirichlet_bc(mat, var%B, in, k, val)
+!      enddo
     enddo
   end subroutine bound_condition
 end module mod_soild_matrix

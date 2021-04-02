@@ -28,40 +28,22 @@ contains
 
     call soild_debug_header("soild_input_mesh")
 
-    if(comm_size > 1)then
-      call modify_finename("node", fname)
-      call monolis_input_mesh_node(fname, mesh%nnode, mesh%node)
+    call modify_finename("node.dat", fname)
+    call monolis_input_mesh_node(fname, mesh%nnode, mesh%node)
 
-      call modify_finename("elem", fname)
-      call monolis_input_mesh_elem(fname, mesh%nelem, mesh%nbase_func, mesh%elem)
+    call modify_finename("elem.dat", fname)
+    call monolis_input_mesh_elem(fname, mesh%nelem, mesh%nbase_func, mesh%elem)
 
-      call modify_finename("node.id", fname)
-      call monolis_input_id(fname, mesh%nid)
-
-      call modify_finename("elem.id", fname)
-      call monolis_input_id(fname, mesh%eid)
-    else
-      call modify_finename("node", fname)
-      call monolis_input_mesh_node(fname, mesh%nnode, mesh%node, mesh%nid)
-
-      call modify_finename("elem", fname)
-      call monolis_input_mesh_elem(fname, mesh%nelem, mesh%nbase_func, mesh%elem, mesh%eid)
-
-      call global_to_local_elem(mesh%nnode, mesh%nid, mesh%nelem, mesh%elem, mesh%nbase_func)
-    endif
-
-    fname = "bc.dat"
+    call modify_finename("bc.dat", fname)
     call monolis_input_condition(fname, param%nbound, ndof, param%ibound, param%bound)
 
-    fname = "load.dat"
+    call modify_finename("load.dat", fname)
     call monolis_input_condition(fname, param%ncload, ndof, param%icload, param%cload)
 
-    call global_to_local_conditoin(mesh%nnode, mesh%nid, param%nbound, param%ibound, param%ncload, param%icload)
-
-    call soild_debug_int("nnode", mesh%nnode)
-    call soild_debug_int("nnode", mesh%nelem)
-    call soild_debug_int("nbound", param%nbound)
-    call soild_debug_int("ncload", param%ncload)
+    !call soild_debug_int("nnode", mesh%nnode)
+    !call soild_debug_int("nnode", mesh%nelem)
+    !call soild_debug_int("nbound", param%nbound)
+    !call soild_debug_int("ncload", param%ncload)
   end subroutine soild_input_mesh
 
   subroutine modify_finename(fname_in, fname)
@@ -69,77 +51,14 @@ contains
     character(*) :: fname_in
     character :: fname*100, cnum*5, output_dir*8
 
-    if(comm_size > 1)then
+    if(monolis_global_commsize() > 1)then
        output_dir = "parted/"
-       write(cnum,"(i0)") myrank
+       write(cnum,"(i0)") monolis_global_myrank()
       fname = trim(output_dir)//trim(fname_in)//"."//trim(cnum)
     else
-      fname = trim(fname_in)//".dat"
+      fname = trim(fname_in)
     endif
   end subroutine modify_finename
-
-  subroutine global_to_local_elem(nnode, nid, nelem, e, nenode)
-    implicit none
-    integer(kint) :: i, in, j, id, nenode
-    integer(kint) :: nnode, nid(:)
-    integer(kint) :: nelem, e(:,:)
-    integer(kint), allocatable :: perm(:), temp(:)
-
-    allocate(temp(nnode), source = 0)
-    allocate(perm(nnode), source = 0)
-    do i = 1, nnode
-      temp(i) = nid(i)
-      perm(i) = i
-    enddo
-    call monolis_qsort_int_with_perm(temp, 1, nnode, perm)
-
-    do i = 1, nelem
-      do j = 1, nenode
-        in = e(j,i)
-        call monolis_bsearch_int(temp, 1, nnode, in, id)
-        if(id == -1)then
-          e(j,i) = -1
-        else
-          e(j,i) = perm(id)
-        endif
-      enddo
-    enddo
-  end subroutine global_to_local_elem
-
-  subroutine global_to_local_conditoin(nnode, nid, nb, b, nc, c)
-    implicit none
-    integer(kint) :: i, in, j, id
-    integer(kint) :: imax, imin, nb, nc
-    integer(kint) :: nnode, nid(:)
-    integer(kint) :: b(:,:), c(:,:)
-    integer(kint), allocatable :: perm(:)
-
-    allocate(perm(nnode), source = 0)
-    do i = 1, nnode
-      perm(i) = i
-    enddo
-    call monolis_qsort_int_with_perm(nid, 1, nnode, perm)
-
-    do i = 1, nb
-      in = b(1,i)
-      call monolis_bsearch_int(nid, 1, nnode, in, id)
-      if(id == -1)then
-        b(1,i) = -1
-      else
-        b(1,i) = perm(id)
-      endif
-    enddo
-
-    do i = 1, nc
-      in = c(1,i)
-      call monolis_bsearch_int(nid, 1, nnode, in, id)
-      if(id == -1)then
-        c(1,i) = -1
-      else
-        c(1,i) = perm(id)
-      endif
-    enddo
-  end subroutine global_to_local_conditoin
 
   subroutine outout_res(mesh, param, var)
     implicit none
@@ -154,12 +73,12 @@ contains
     nnode = mesh%nnode
     nelem = mesh%nelem
 
-    open(20, file='u.dat', status='replace')
-      write(20,"(i0)")nnode
-      do i = 1, nnode
-        write(20,"(i0,1p3e22.14)")mesh%nid(i), var%u(3*i-2), var%u(3*i-1), var%u(3*i)
-      enddo
-    close(20)
+    !open(20, file='u.dat', status='replace')
+    !  write(20,"(i0)")nnode
+    !  do i = 1, nnode
+    !    write(20,"(i0,1p3e22.14)")mesh%nid(i), var%u(3*i-2), var%u(3*i-1), var%u(3*i)
+    !  enddo
+    !close(20)
 
     output_dir = "visual/"
     call system('if [ ! -d visual ]; then (echo "** create visual"; mkdir -p visual); fi')
@@ -168,7 +87,7 @@ contains
 
     write(cstep,"(i5.5)")param%cur_time_step
 
-    if(monolis%COM%myrank == 0)then
+    if(monolis_global_myrank() == 0)then
     open(20, file=trim(output_dir)//'result.'//trim(cstep)//'.pvtu', status='replace')
       write(20,"(a)")'<?xml version="1.0"?>'
       write(20,"(a)")'<VTKFile type="PUnstructuredGrid" version="1.0" byte_order="LittleEndian" header_type="UInt32">'
@@ -193,7 +112,7 @@ contains
       write(20,"(a)")'<PDataArray type="Float32" Name="estress" NumberOfComponents="6" format="appended"/>'
       write(20,"(a)")'<PDataArray type="Float32" Name="emises" NumberOfComponents="1" format="appended"/>'
       write(20,"(a)")'</PCellData>'
-      do i = 0, monolis%COM%commsize - 1
+      do i = 0, monolis_global_commsize() - 1
         write(cnum,"(i0)") i
         write(20,"(a)")'<Piece Source="./result.'//trim(cstep)//'.'//trim(cnum)//'.vtu"/>'
       enddo
@@ -202,7 +121,7 @@ contains
     close(20)
     endif
 
-    write(cnum,"(i0)")monolis%COM%myrank
+    write(cnum,"(i0)")monolis_global_myrank()
 
     open(20, file=trim(output_dir)//'result.'//trim(cstep)//'.'//trim(cnum)//'.vtu', status='replace')
       write(20,"(a)")'<?xml version="1.0"?>'
@@ -302,7 +221,7 @@ contains
     type(meshdef) :: mesh
     type(vardef) :: var
     integer(kint) :: i, j, nnode, nelem
-    real(kind=kdouble) :: thr
+    real(kdouble) :: thr
 
     nnode = mesh%nnode
     nelem = mesh%nelem
