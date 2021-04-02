@@ -21,7 +21,7 @@ contains
       call monolis_C3D8_get_global_deriv(x, r, dndx, det)
       call C3D8_Bmat(dndx, B)
       call C3D8_Dmat(param%E, param%mu, D)
-      call C3D8_Kmat(mesh, D, B, wg, det, stiff)
+      call C3D8_Kmat(D, B, wg, det, stiff)
     enddo
   end subroutine C3D8_stiff
 
@@ -189,14 +189,12 @@ contains
     D(6,6) = 0.5d0*g*(1.0d0-2.0d0*mu)
   end subroutine C3D8_Dmat
 
-  subroutine C3D8_Kmat(mesh, D, B, wg, det, stiff)
+  subroutine C3D8_Kmat(D, B, wg, det, stiff)
     implicit none
-    type(meshdef) :: mesh
     integer(kint) :: i, j, k
     real(kdouble) :: stiff(24,24), D(6,6), B(6,24), DB(6,24), wg, det
 
     DB = matmul(D, B)
-
     do i = 1, 24
       do j = 1, 24
         do k = 1, 6
