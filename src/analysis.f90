@@ -76,7 +76,6 @@ contains
 
     do NRiter = 1, param%max_nrstep
       t2 = monolis_get_time_sync()
-      !monolis%MAT%A = 0.0d0
 
       call get_stiff_matrix(mesh, var, param)
       call get_RHS(mesh, var)

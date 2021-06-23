@@ -15,6 +15,7 @@ contains
     real(kdouble) :: stiff(24,24), x(3,8)
 
     call soild_debug_header("get_stiff_matrix")
+    call monolis_clear_mat_value(mat)
 
     do icel = 1, mesh%nelem
       call get_element_node_id(icel, mesh%elem, elem)
