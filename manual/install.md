@@ -31,6 +31,7 @@ sudo apt install -y git
 sudo apt install -y wget
 sudo apt install -y openmpi-doc openmpi-bin libopenmpi-dev
 ```
+
 CentOS 環境では、以下のコマンドでインストールできる。
 
 ```bash
@@ -41,6 +42,15 @@ sudo yum install -y cmake
 sudo yum install -y git
 sudo yum install -y wget
 sudo yum install -y openmpi openmpi-devel
+```
+
+`which mpif90` コマンドなどで正しくインストールされているか確認できるが、
+`mpif90` コマンドが見つからない場合は、`/usr/lib64/openmpi/bin` にパスを通す。
+具体的には、`~/.bash_profile` ファイルの `PATH` の部分を以下のように書き換える。
+
+```bash
+PATH=$PATH:$HOME/bin:/usr/lib64/openmpi/bin
+export PATH
 ```
 
 ### 2. クローン
