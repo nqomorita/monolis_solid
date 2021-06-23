@@ -9,6 +9,39 @@
 Gitlab の [SSH keys](https://gitlab.com/profile/keys) から、公開鍵を登録する。
 例えば、[Qiita:【GitLab】SSH認証キー（公開鍵）を登録する](https://qiita.com/CUTBOSS/items/462a2ed28d264aeff7d5) などに詳しい。
 
+### 1. インストール環境の準備
+
+インストールには以下の環境が必要である。
+
+- make
+- cmake
+- git
+- gcc (gfortran)
+- MPI
+
+Ubuntu 環境では、以下のコマンドでインストールできる。
+
+```bash
+sudo apt update
+sudo apt upgrade
+sudo apt install -y build-essential
+sudo apt install -y cmake
+sudo apt install -y gfortran
+sudo apt install -y git
+sudo apt install -y wget
+sudo apt install -y openmpi-doc openmpi-bin libopenmpi-dev
+```
+CentOS 環境では、以下のコマンドでインストールできる。
+
+```bash
+sudo yum update
+sudo yum groupinstall -y "Development Tools"
+sudo yum install -y make
+sudo yum install -y cmake
+sudo yum install -y git
+sudo yum install -y wget
+sudo yum install -y openmpi openmpi-devel
+```
 
 ### 2. クローン
 
@@ -58,7 +91,7 @@ $ ls bin
 circlar_hole # 二次元円孔付き半無限板
 ```
 
-例えば、以下のようなコマンドで、SFEM プログラムを実行できる。
+例えば、以下のようなコマンドで、プログラムを実行できる。
 
 ```
 $ cd example/circlar_hole

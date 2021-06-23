@@ -3,6 +3,5 @@
 #> monolis
 git submodule update --init --recursive
 cd submodule/monolis
-./install_lib.sh
+./install_lib.sh METIS
 make FLAGS=MPI,METIS
-
