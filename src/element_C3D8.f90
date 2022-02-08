@@ -312,6 +312,7 @@ contains
       stress = matmul(D, strain)
       var%gauss(i,icel)%strain = strain
       var%gauss(i,icel)%stress = stress
+      q = q + matmul(stress, B)*det
     enddo
   end subroutine C3D8_update
 
