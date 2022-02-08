@@ -19,8 +19,7 @@ contains
 
     do icel = 1, mesh%nelem
       call get_element_node_id(icel, mesh%elem, elem)
-      call get_element_node(elem, mesh%node, x)
-      call C3D8_stiff(mesh, var, param, icel, x, stiff)
+      call C3D8_stiff(mesh, var, param, icel, stiff)
       call monolis_add_matrix_to_sparse_matrix(mat, 8, elem, stiff)
     enddo
   end subroutine get_stiff_matrix
