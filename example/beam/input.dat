@@ -1,0 +1,6 @@
+1 !> 1:nonlinear
+100 !> NR step
+ 206000.0 !> Young modulus
+      0.3 !> Poisson ratio
+   1090.0 !> density
+
