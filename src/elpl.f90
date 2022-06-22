@@ -80,22 +80,23 @@ contains
 
     if(.not. is_nl_mat) return
 
-    k = size(param%Fstress)
+    k = size(param%stress_table)
 
     if(peeq <= 0.0d0)then
-      sigma_y = param%Fstress(1)
-      H = (param%Fstress(2) - param%Fstress(1))/(param%Fstrain(2) - param%Fstrain(1))
+      sigma_y = param%stress_table(1)
+      H = (param%stress_table(2) - param%stress_table(1))/ &
+          (param%strain_table(2) - param%strain_table(1))
 
-    elseif(peeq > param%Fstrain(k))then
-      sigma_y = param%Fstress(k)
+    elseif(peeq > param%strain_table(k))then
+      sigma_y = param%stress_table(k)
       H = 0.0d0
     endif
 
     do i = 1, k-1
-       e1 = param%Fstrain(i)
-       e2 = param%Fstrain(i+1)
-       s1 = param%Fstress(i)
-       s2 = param%Fstress(i+1)
+       e1 = param%strain_table(i)
+       e2 = param%strain_table(i+1)
+       s1 = param%stress_table(i)
+       s2 = param%stress_table(i+1)
 
        if(e1 <= peeq .and. peeq <= e2)then
          H = (s2-s1)/(e2-e1)
@@ -108,10 +109,9 @@ contains
   subroutine backward_Euler(param, stress, peeq, PPStrain, sigma_y, dlambda)
     type(paramdef) :: param
     real(kdouble), parameter :: tol = 1.0d-6
-    integer, parameter :: MAXITER = 20
     real(kdouble) :: stress(6), dlambda, f, mises, peeq, PPStrain(6)
     real(kdouble) :: E, mu, sigma_y, sigma_m, H, ddlambda, G, K, devia(6)
-    integer(kint) :: i, j
+    integer(kint) :: i
 
     E = param%E
     mu = param%mu
@@ -130,7 +130,7 @@ contains
 
     dlambda = 0.0d0
     f = mises - sigma_y
-    do i = 1, MAXITER
+    do i = 1, 20
       call get_harden_coef(param, peeq + dlambda, H, sigma_y)
       ddlambda = 3.d0*G + H
       dlambda = dlambda + f/ddlambda

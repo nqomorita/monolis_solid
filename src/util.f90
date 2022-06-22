@@ -36,8 +36,8 @@ module mod_soild_util
     real(kdouble), allocatable :: cload(:)
 
     !> for elast-plactis
-    real(kdouble), allocatable :: Fstrain(:)
-    real(kdouble), allocatable :: Fstress(:)
+    real(kdouble), allocatable :: strain_table(:)
+    real(kdouble), allocatable :: stress_table(:)
 
     !> for material property
     real(kdouble) :: E, mu, rho
