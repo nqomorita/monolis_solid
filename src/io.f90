@@ -10,7 +10,9 @@ contains
 
     open(10, file="input.dat", status='old')
       read(10,*) i
-      if(i == 1) isNLGeom = .true.
+      if(i == 1) is_nl_geom = .true.
+      read(10,*) i
+      if(i == 1) is_nl_mat = .true.
       read(10,*) param%max_nrstep
       read(10,*) param%E
       read(10,*) param%mu

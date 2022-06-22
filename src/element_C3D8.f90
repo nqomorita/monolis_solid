@@ -178,7 +178,7 @@ contains
       B(6,i3) = dndx(i,1)
     enddo
 
-    if(isNLGeom)then
+    if(is_nl_geom)then
       dudx = 0.0d0
       dudx = matmul(u, dndx)
       do i = 1, 8
@@ -243,7 +243,7 @@ contains
       enddo
     enddo
 
-    if(isNLGeom)then
+    if(is_nl_geom)then
       BN = 0.0d0
       do j = 1, 8
         BN(1, 3*j-2) = dndx(j, 1)
@@ -330,7 +330,7 @@ contains
     strain(5) =(xj(2,3) + xj(3,2))
     strain(6) =(xj(3,1) + xj(1,3))
 
-    if(isNLGeom)then
+    if(is_nl_geom)then
       strain(1) = strain(1) + 0.5d0*dot_product(xj(:, 1), xj(:, 1))
       strain(2) = strain(2) + 0.5d0*dot_product(xj(:, 2), xj(:, 2))
       strain(3) = strain(3) + 0.5d0*dot_product(xj(:, 3), xj(:, 3))

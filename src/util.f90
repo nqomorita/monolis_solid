@@ -2,7 +2,8 @@ module mod_soild_util
   use mod_monolis
 
   integer(kint), parameter :: ndof = 3
-  logical, save :: isNLGeom = .false.
+  logical, save :: is_nl_geom = .false.
+  logical, save :: is_nl_mat = .false.
 
   type gaussdef
     real(kdouble) :: strain(6)
