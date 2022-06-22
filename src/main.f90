@@ -22,7 +22,7 @@ program main
   t2 = monolis_get_time()
   call soild_plot_time("input", t2 - t1)
 
-  if(is_nl_geom)then
+  if(is_nl_geom .or. is_nl_mat)then
     call solid_nonlinear_static(mesh, param, var)
   else
     call solid_linear_static(mesh, param, var)

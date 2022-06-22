@@ -1,5 +1,6 @@
 module mod_soild_c3d8
   use mod_soild_util
+  use mod_soild_elpl
 
 contains
 
@@ -211,6 +212,17 @@ contains
     implicit none
     real(kdouble) :: D(6,6), E, mu, g
 
+    if(is_nl_mat)then
+      call C3D8_Dmat_elast_plastic(E, mu, D)
+    else
+      call C3D8_Dmat_elastic(E, mu, D)
+    endif
+  end subroutine C3D8_Dmat
+
+  subroutine C3D8_Dmat_elastic(E, mu, D)
+    implicit none
+    real(kdouble) :: D(6,6), E, mu, g
+
     D = 0.0d0
     g = E / ((1.0d0+mu) * (1.0d0-2.0d0*mu))
 
@@ -226,7 +238,7 @@ contains
     D(4,4) = 0.5d0*g*(1.0d0-2.0d0*mu)
     D(5,5) = 0.5d0*g*(1.0d0-2.0d0*mu)
     D(6,6) = 0.5d0*g*(1.0d0-2.0d0*mu)
-  end subroutine C3D8_Dmat
+  end subroutine C3D8_Dmat_elastic
 
   subroutine C3D8_Kmat(D, B, wg, det, stress, dndx, stiff)
     implicit none
