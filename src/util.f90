@@ -35,6 +35,10 @@ module mod_soild_util
     integer(kint), allocatable :: icload(:,:)
     real(kdouble), allocatable :: cload(:)
 
+    !> for elast-plactis
+    real(kdouble), allocatable :: Fstrain(:)
+    real(kdouble), allocatable :: Fstress(:)
+
     !> for material property
     real(kdouble) :: E, mu, rho
   end type paramdef

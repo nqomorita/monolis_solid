@@ -32,7 +32,7 @@ contains
       call monolis_C3D8_integral_point(i, r)
       call monolis_C3D8_get_global_deriv(x, r, dndx, det)
       call C3D8_Bmat(dndx, u, B)
-      call C3D8_Dmat(param%E, param%mu, D)
+      call C3D8_Dmat(param, D)
       call C3D8_Kmat(D, B, wg, det, var%gauss(i,icel)%stress, dndx, stiff)
     enddo
   end subroutine C3D8_stiff
@@ -208,37 +208,17 @@ contains
     endif
   end subroutine C3D8_Bmat
 
-  subroutine C3D8_Dmat(E, mu, D)
+  subroutine C3D8_Dmat(param, D)
     implicit none
-    real(kdouble) :: D(6,6), E, mu, g
+    type(paramdef) :: param
+    real(kdouble) :: D(6,6)
 
     if(is_nl_mat)then
-      call C3D8_Dmat_elast_plastic(E, mu, D)
+      call Dmat_elast_plastic(param, D)
     else
-      call C3D8_Dmat_elastic(E, mu, D)
+      call Dmat_elastic(param%E, param%mu, D)
     endif
   end subroutine C3D8_Dmat
-
-  subroutine C3D8_Dmat_elastic(E, mu, D)
-    implicit none
-    real(kdouble) :: D(6,6), E, mu, g
-
-    D = 0.0d0
-    g = E / ((1.0d0+mu) * (1.0d0-2.0d0*mu))
-
-    D(1,1) = g*(1.0d0-mu)
-    D(1,2) = g*mu
-    D(1,3) = g*mu
-    D(2,1) = g*mu
-    D(2,2) = g*(1.0d0-mu)
-    D(2,3) = g*mu
-    D(3,1) = g*mu
-    D(3,2) = g*mu
-    D(3,3) = g*(1.0d0-mu)
-    D(4,4) = 0.5d0*g*(1.0d0-2.0d0*mu)
-    D(5,5) = 0.5d0*g*(1.0d0-2.0d0*mu)
-    D(6,6) = 0.5d0*g*(1.0d0-2.0d0*mu)
-  end subroutine C3D8_Dmat_elastic
 
   subroutine C3D8_Kmat(D, B, wg, det, stress, dndx, stiff)
     implicit none
@@ -318,7 +298,7 @@ contains
       call monolis_C3D8_integral_point(i, r)
       call monolis_C3D8_get_global_deriv(x0, r, dndx, det)
       call C3D8_Bmat(dndx, u, B)
-      call C3D8_Dmat(param%E, param%mu, D)
+      call C3D8_Dmat(param, D)
       call C3D8_get_starian(u, dndx, strain)
 
       stress = matmul(D, strain)
