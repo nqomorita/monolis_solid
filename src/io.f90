@@ -6,7 +6,7 @@ contains
   subroutine soild_input_param(param)
     implicit none
     type(paramdef) :: param
-    integer(kint) :: i
+    integer(kint) :: i, n
 
     open(10, file="input.dat", status='old')
       read(10,*) i
@@ -17,6 +17,17 @@ contains
       read(10,*) param%E
       read(10,*) param%mu
       read(10,*) param%rho
+    close(10)
+
+    if(.not. is_nl_mat) return
+
+    open(10, file="input_elpl.dat", status='old')
+      read(10,*) n
+      allocate(param%strain_table(n), source = 0.0d0)
+      allocate(param%stress_table(n), source = 0.0d0)
+      do i = 1, n
+        read(10,*) param%strain_table(i), param%stress_table(i)
+      enddo
     close(10)
   end subroutine soild_input_param
 

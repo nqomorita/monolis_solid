@@ -22,7 +22,7 @@ contains
     call monolis_param_set_is_debug(mat, .false.)
     call monolis_param_set_show_time(mat, .false.)
     call monolis_param_set_show_iterlog(mat, .false.)
-    call monolis_param_set_show_summary(mat, .true.)
+    call monolis_param_set_show_summary(mat, .false.)
 
     call monolis_solve(mat, var%B, var%X)
 !    call soild_plot_solver(mat%PRM%curiter, mat%PRM%curresid)

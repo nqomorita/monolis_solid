@@ -6,6 +6,7 @@ module mod_soild_util
   logical, save :: is_nl_mat = .false.
 
   type gaussdef
+    integer(kint) :: is_yield
     real(kdouble) :: strain(6)
     real(kdouble) :: stress(6)
     real(kdouble) :: eq_pstrain
@@ -95,8 +96,11 @@ contains
 
     do i = 1, mesh%nelem
       do j = 1, 8
+        var%gauss(j,i)%is_yield = 0
         var%gauss(j,i)%strain = 0.0d0
         var%gauss(j,i)%stress = 0.0d0
+        var%gauss(j,i)%eq_pstrain = 0.0d0
+        var%gauss(j,i)%eq_pstrain_back = 0.0d0
       enddo
     enddo
   end subroutine init_mesh

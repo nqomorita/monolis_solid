@@ -13,7 +13,8 @@ module mod_soild_debug
   public :: soild_plot_time
   public :: soild_plot_solver
 
-  integer(kint), parameter :: flog = 30
+  integer(kint), parameter :: flag = 30
+  logical, save :: is_debug = .false.
 
 contains
 
@@ -21,14 +22,14 @@ contains
     implicit none
     character(*) :: header
 
-    if(monolis_global_myrank() == 0) write(*,"(a)")"* "//trim(header)
+    if(monolis_global_myrank() == 0 .and. is_debug) write(*,"(a)")"* "//trim(header)
   end subroutine soild_write_header
 
   subroutine soild_debug_header(header)
     implicit none
     character(*) :: header
 
-    if(monolis_global_myrank() == 0)then
+    if(monolis_global_myrank() == 0 .and. is_debug)then
       write(*,"(a)")"** soild debug: "//trim(header)
     endif
   end subroutine soild_debug_header
@@ -38,7 +39,7 @@ contains
     integer(kint) :: n
     character(*) :: header
 
-    if(monolis_global_myrank() == 0) write(*,"(a,i12)")"** soild debug: "//trim(header)//": ", n
+    if(monolis_global_myrank() == 0 .and. is_debug) write(*,"(a,i12)")"** soild debug: "//trim(header)//": ", n
   end subroutine soild_debug_int
 
   subroutine soild_debug_real(header, r)
@@ -46,14 +47,14 @@ contains
     real(kdouble) :: r
     character(*) :: header
 
-    if(monolis_global_myrank() == 0) write(*,"(a,1pe12.5)")"** soild debug: "//trim(header)//": ", r
+    if(monolis_global_myrank() == 0 .and. is_debug) write(*,"(a,1pe12.5)")"** soild debug: "//trim(header)//": ", r
   end subroutine soild_debug_real
 
   subroutine soild_debug_char(header, char)
     implicit none
     character(*) :: header, char
 
-    if(monolis_global_myrank() == 0) write(*,"(a,a)")"** soild debug: "//trim(header)//": ", trim(char)
+    if(monolis_global_myrank() == 0 .and. is_debug) write(*,"(a,a)")"** soild debug: "//trim(header)//": ", trim(char)
   end subroutine soild_debug_char
 
   subroutine soild_debug_logical(header, l)
@@ -61,16 +62,16 @@ contains
     logical :: l
     character(*) :: header
 
-    if(monolis_global_myrank() == 0) write(*,"(a,l)")"** soild debug: "//trim(header)//": ", l
+    if(monolis_global_myrank() == 0 .and. is_debug) write(*,"(a,l)")"** soild debug: "//trim(header)//": ", l
   end subroutine soild_debug_logical
 
   subroutine soild_debug_time(step, time)
     implicit none
     integer(kint) :: step
     real(kdouble) :: time
-    if(monolis_global_myrank() == 0)then
+    if(monolis_global_myrank() == 0 .and. is_debug)then
       write(*,"(a,i8,1pe12.5)")"* current time step: ", step, time
-      !write(flog,"(a,i8,1pe12.5)")"* current time step: ", step, time
+      !write(flag,"(a,i8,1pe12.5)")"* current time step: ", step, time
     endif
   end subroutine soild_debug_time
 
@@ -79,9 +80,9 @@ contains
     real(kdouble) :: time
     character(*) :: header
 
-    if(monolis_global_myrank() == 0)then
+    if(monolis_global_myrank() == 0 .and. is_debug)then
       write(*,"(a,1pe10.3,a)")"  - "//trim(header)//" elapse time: ", time, " [sec]"
-      !write(flog,"(a,1pe10.3,a)")"  - "//trim(header)//" elapse time: ", time, " [sec]"
+      !write(flag,"(a,1pe10.3,a)")"  - "//trim(header)//" elapse time: ", time, " [sec]"
     endif
   end subroutine soild_plot_time
 
@@ -91,8 +92,8 @@ contains
     real(kdouble) :: resid
 
     !if(myrank == 0)then
-    !  write(flog,"(a,i8)")     "  - monolis converge iter    :", iter
-    !  write(flog,"(a,1pe10.3)")"  - monolis converge residual:", resid
+    !  write(flag,"(a,i8)")     "  - monolis converge iter    :", iter
+    !  write(flag,"(a,1pe10.3)")"  - monolis converge residual:", resid
     !endif
   end subroutine soild_plot_solver
 

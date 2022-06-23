@@ -1,5 +1,6 @@
 module mod_soild_elpl
   use mod_soild_util
+  use mod_soild_debug
 
   implicit none
 
@@ -39,7 +40,7 @@ contains
     implicit none
     type(paramdef) :: param
     type(gaussdef) :: gauss
-    integer :: i, j, is_yield
+    integer(kint) :: i, j
     real(kdouble) :: D(6,6), De(6,6), stress(6)
     real(kdouble) :: q, C1,C2, dum, a(6), dlambda
     real(kdouble) :: sigma_m, J2, H, devia(6), G, eq_pstrain, sigma_y
@@ -48,8 +49,9 @@ contains
     D = De
 
     if(.not. is_nl_mat) return
-    if(is_yield == 0)   return
+    if(gauss%is_yield == 0)   return
 
+    stress = gauss%stress
     sigma_m = (stress(1) + stress(2) + stress(3))/3.0d0
     devia(1:3) = stress(1:3) - sigma_m
     devia(4:6) = stress(4:6)
@@ -111,7 +113,7 @@ contains
     type(paramdef) :: param
     type(gaussdef) :: gauss
     real(kdouble), parameter :: tol = 1.0d-6
-    real(kdouble) :: stress(6), dlambda, f, mises, eq_pstrain!, PPStrain(6)
+    real(kdouble) :: stress(6), dlambda, f, mises, eq_pstrain
     real(kdouble) :: E, mu, sigma_y, sigma_m, H, ddlambda, G, devia(6)
     integer(kint) :: i
 
@@ -123,6 +125,19 @@ contains
     call get_mises(stress(1:6), mises)
     call get_harden_coef(param, eq_pstrain, H, sigma_y)
     f = mises - sigma_y
+
+    if(dabs(f) < tol) then
+      !> yielded
+      gauss%is_yield = 1
+      return
+    elseif(f < 0.0d0)then
+      !> not yielded or unloading
+      gauss%is_yield = 0
+      return
+    endif
+
+    !> yielded
+    gauss%is_yield = 1
 
     dlambda = 0.0d0
     do i = 1, 20
@@ -149,39 +164,5 @@ contains
     type(meshdef) :: mesh
     type(paramdef) :: param
     type(vardef) :: var
-    !integer(kint) :: i
-
-!    real(kdouble), parameter :: tol = 1.0d-3
-!    real(kdouble) :: mises_update, sigma_y, dlambda, f, PPStrain(6)
-
-!    if (dabs(f) < tol .or. is_linear) then
-!      var%id(i)%is_yield = 1
-!      var%id(i)%dlambda  = 0.0d0
-!      var%id(i)%strain   = var%id(i)%strain_bak + var%id(i)%dstrain
-!      var%id(i)%plstrain = var%id(i)%plstrain_bak
-!      var%id(i)%equival  = var%id(i)%equival_bak
-
-!    elseif (f < 0.0d0) then
-!      var%id(i)%dlambda  = 0.0d0
-!      var%id(i)%is_yield = 0
-!      var%id(i)%strain   = var%id(i)%strain_bak + var%id(i)%dstrain
-!      var%id(i)%plstrain = var%id(i)%plstrain_bak
-!      var%id(i)%equival  = var%id(i)%equival_bak
-!    else
-
-!      call BackwardEuler(param, var%id(i)%stress, var%id(i)%equival_bak, &
-!      & PPStrain, sigma_y, dlambda)
-
-!      var%id(i)%strain   = var%id(i)%strain_bak + var%id(i)%dstrain - PPStrain
-!      var%id(i)%plstrain = var%id(i)%plstrain_bak + PPStrain
-!      var%id(i)%is_yield = 1
-
-!      if(dlambda < 0.0d0) dlambda = 0.0d0
-!      var%id(i)%dlambda = dlambda
-!      var%id(i)%equival = var%id(i)%equival_bak + dlambda
-!    endif
-
-!    call get_mises(var%id(i)%stress(1:6), mises_update)
-!    var%id(i)%mises = mises_update
   end subroutine elast_plastic_update
 end module mod_soild_elpl
