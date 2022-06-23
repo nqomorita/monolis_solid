@@ -302,11 +302,11 @@ contains
       call C3D8_get_starian(u, dndx, strain)
       var%gauss(i,icel)%strain = strain
 
+      call Dmat_elastic(param%E, param%mu, D)
+      var%gauss(i,icel)%stress = matmul(D, var%gauss(i,icel)%strain)
+
       if(is_nl_mat)then
         call backward_Euler(param, var%gauss(i,icel))
-      else
-        call C3D8_Dmat(param, var%gauss(i,icel), D)
-        var%gauss(i,icel)%stress = matmul(D, strain)
       endif
 
       q = q + matmul(var%gauss(i,icel)%stress, B)*det

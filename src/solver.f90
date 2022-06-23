@@ -41,13 +41,14 @@ contains
     type(vardef) :: var
     integer(kint) :: step
     real(kdouble), save :: b0nrm
-    real(kdouble) :: bnrm, rnrm, rnrmmax
+    real(kdouble) :: bnrm, rnrm, rnrmmax, qnrm
     logical :: is_convergence
 
     is_convergence = .false.
 
     bnrm = 0.0d0
     rnrm = 0.0d0
+    call monolis_inner_product_R(mat%COM, mesh%nnode, ndof, var%q, var%q, qnrm)
     call monolis_inner_product_R(mat%COM, mesh%nnode, ndof, var%B, var%B, bnrm)
     bnrm = bnrm
 
@@ -55,7 +56,8 @@ contains
       b0nrm = bnrm
       write(*,"(a,1pe12.5)")"  ** NR        b0nrm: ", dsqrt(b0nrm)
     else
-      rnrm    = dsqrt(bnrm/b0nrm)
+      !rnrm    = dsqrt(bnrm/b0nrm)
+      rnrm    = dsqrt(bnrm/qnrm)
       rnrmmax = dabs(maxval(var%B))
       write(*,"(a,1pe12.5,a,1pe12.5)")"  ** NR     residual: ", rnrm, ", ", rnrmmax
       if(rnrm < 1.0d-6 .or. rnrmmax < 1.0d-8) is_convergence = .true.

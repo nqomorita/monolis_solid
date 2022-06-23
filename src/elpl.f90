@@ -59,7 +59,7 @@ contains
                dot_product(devia(4:6), devia(4:6))
     a(1:6) = devia(1:6)/dsqrt(2.0d0*J2)
 
-    eq_pstrain = gauss%eq_pstrain
+    eq_pstrain = gauss%eq_pstrain_trial
     call get_harden_coef_and_sigma_y(param, eq_pstrain, H, sigma_y)
 
     G = De(4,4)
@@ -87,12 +87,15 @@ contains
 
     if(eq_pstrain <= 0.0d0)then
       sigma_y = param%stress_table(1)
-      H = (param%stress_table(2) - param%stress_table(1))/ &
-          (param%strain_table(2) - param%strain_table(1))
+      !H = (param%stress_table(2) - param%stress_table(1))/ &
+      !    (param%strain_table(2) - param%strain_table(1))
+      H = 0.0d0
+      return
 
     elseif(eq_pstrain > param%strain_table(k))then
       sigma_y = param%stress_table(k)
       H = 0.0d0
+      return
     endif
 
     do i = 1, k-1
@@ -112,7 +115,7 @@ contains
   subroutine backward_Euler(param, gauss)
     type(paramdef) :: param
     type(gaussdef) :: gauss
-    real(kdouble), parameter :: tol = 1.0d-6
+    real(kdouble), parameter :: tol = 1.0d-9
     real(kdouble) :: stress(6), dlambda, f, mises, eq_pstrain
     real(kdouble) :: E, mu, sigma_y, sigma_m, H, ddlambda, G, devia(6)
     integer(kint) :: i
@@ -122,6 +125,8 @@ contains
     G = E/(2.0d0*(1.0d0 + mu))
 
     eq_pstrain = gauss%eq_pstrain
+
+    stress = gauss%stress
     call get_mises(stress(1:6), mises)
     call get_harden_coef_and_sigma_y(param, eq_pstrain, H, sigma_y)
     f = mises - sigma_y
@@ -140,10 +145,19 @@ contains
     gauss%is_yield = 1
 
     dlambda = 0.0d0
-    do i = 1, 20
-      call get_harden_coef_and_sigma_y(param, eq_pstrain + dlambda, H, sigma_y)
+    call get_harden_coef_and_sigma_y(param, eq_pstrain + dlambda, H, sigma_y)
+
+    do i = 1, 5
       ddlambda = 3.d0*G + H
       dlambda = dlambda + f/ddlambda
+
+      if(dlambda < 0.0d0)then
+        dlambda = 0.0d0
+        gauss%is_yield = 0
+        exit
+      endif
+
+      call get_harden_coef_and_sigma_y(param, eq_pstrain + dlambda, H, sigma_y)
       f = mises - 3.0d0*G*dlambda - sigma_y
       if(dabs(f) < tol) exit
     enddo
@@ -156,7 +170,7 @@ contains
     stress(4:6) = devia(4:6)
 
     gauss%stress = stress
-    gauss%eq_pstrain = gauss%eq_pstrain + dlambda
+    gauss%eq_pstrain_trial = gauss%eq_pstrain + dlambda
   end subroutine backward_Euler
 
   subroutine elast_plastic_update(mesh, param, var)

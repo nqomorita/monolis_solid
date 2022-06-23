@@ -11,6 +11,7 @@ module mod_soild_util
     real(kdouble) :: stress(6)
     real(kdouble) :: eq_pstrain
     real(kdouble) :: eq_pstrain_back
+    real(kdouble) :: eq_pstrain_trial
   end type gaussdef
 
   type meshdef
@@ -101,6 +102,7 @@ contains
         var%gauss(j,i)%stress = 0.0d0
         var%gauss(j,i)%eq_pstrain = 0.0d0
         var%gauss(j,i)%eq_pstrain_back = 0.0d0
+        var%gauss(j,i)%eq_pstrain_trial = 0.0d0
       enddo
     enddo
   end subroutine init_mesh
