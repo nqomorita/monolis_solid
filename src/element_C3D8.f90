@@ -300,13 +300,16 @@ contains
       call monolis_C3D8_get_global_deriv(x0, r, dndx, det)
       call C3D8_Bmat(dndx, u, B)
       call C3D8_get_starian(u, dndx, strain)
-
-!> should be modified
-      call C3D8_Dmat(param, var%gauss(i,icel), D)
-      stress = matmul(D, strain)
       var%gauss(i,icel)%strain = strain
-      var%gauss(i,icel)%stress = stress
-      q = q + matmul(stress, B)*det
+
+      if(is_nl_mat)then
+        call backward_Euler(param, var%gauss(i,icel))
+      else
+        call C3D8_Dmat(param, var%gauss(i,icel), D)
+        var%gauss(i,icel)%stress = matmul(D, strain)
+      endif
+
+      q = q + matmul(var%gauss(i,icel)%stress, B)*det
     enddo
   end subroutine C3D8_update
 
