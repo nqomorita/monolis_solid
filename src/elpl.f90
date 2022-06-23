@@ -60,7 +60,7 @@ contains
     a(1:6) = devia(1:6)/dsqrt(2.0d0*J2)
 
     eq_pstrain = gauss%eq_pstrain
-    call get_harden_coef(param, eq_pstrain, H, sigma_y)
+    call get_harden_coef_and_sigma_y(param, eq_pstrain, H, sigma_y)
 
     G = De(4,4)
     dlambda = eq_pstrain - gauss%eq_pstrain_back
@@ -75,7 +75,7 @@ contains
     enddo
   end subroutine Dmat_elast_plastic
 
-  subroutine get_harden_coef(param, eq_pstrain, H, sigma_y)
+  subroutine get_harden_coef_and_sigma_y(param, eq_pstrain, H, sigma_y)
     implicit none
     type(paramdef) :: param
     integer(kint) :: i, k
@@ -107,7 +107,7 @@ contains
          return
        endif
     enddo
-  end subroutine get_harden_coef
+  end subroutine get_harden_coef_and_sigma_y
 
   subroutine backward_Euler(param, gauss)
     type(paramdef) :: param
@@ -123,7 +123,7 @@ contains
 
     eq_pstrain = gauss%eq_pstrain
     call get_mises(stress(1:6), mises)
-    call get_harden_coef(param, eq_pstrain, H, sigma_y)
+    call get_harden_coef_and_sigma_y(param, eq_pstrain, H, sigma_y)
     f = mises - sigma_y
 
     if(dabs(f) < tol) then
@@ -141,7 +141,7 @@ contains
 
     dlambda = 0.0d0
     do i = 1, 20
-      call get_harden_coef(param, eq_pstrain + dlambda, H, sigma_y)
+      call get_harden_coef_and_sigma_y(param, eq_pstrain + dlambda, H, sigma_y)
       ddlambda = 3.d0*G + H
       dlambda = dlambda + f/ddlambda
       f = mises - 3.0d0*G*dlambda - sigma_y
