@@ -32,7 +32,7 @@ contains
       call monolis_C3D8_integral_point(i, r)
       call monolis_C3D8_get_global_deriv(x, r, dndx, det)
       call C3D8_Bmat(dndx, u, B)
-      call C3D8_Dmat(param, D)
+      call C3D8_Dmat(param, var%gauss(i,icel), D)
       call C3D8_Kmat(D, B, wg, det, var%gauss(i,icel)%stress, dndx, stiff)
     enddo
   end subroutine C3D8_stiff
@@ -208,13 +208,14 @@ contains
     endif
   end subroutine C3D8_Bmat
 
-  subroutine C3D8_Dmat(param, D)
+  subroutine C3D8_Dmat(param, gauss, D)
     implicit none
     type(paramdef) :: param
+    type(gaussdef) :: gauss
     real(kdouble) :: D(6,6)
 
     if(is_nl_mat)then
-      call Dmat_elast_plastic(param, D)
+      call Dmat_elast_plastic(param, gauss, D)
     else
       call Dmat_elastic(param%E, param%mu, D)
     endif
@@ -298,9 +299,10 @@ contains
       call monolis_C3D8_integral_point(i, r)
       call monolis_C3D8_get_global_deriv(x0, r, dndx, det)
       call C3D8_Bmat(dndx, u, B)
-      call C3D8_Dmat(param, D)
       call C3D8_get_starian(u, dndx, strain)
 
+!> should be modified
+      call C3D8_Dmat(param, var%gauss(i,icel), D)
       stress = matmul(D, strain)
       var%gauss(i,icel)%strain = strain
       var%gauss(i,icel)%stress = stress

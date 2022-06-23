@@ -8,6 +8,8 @@ module mod_soild_util
   type gaussdef
     real(kdouble) :: strain(6)
     real(kdouble) :: stress(6)
+    real(kdouble) :: eq_pstrain
+    real(kdouble) :: eq_pstrain_back
   end type gaussdef
 
   type meshdef
