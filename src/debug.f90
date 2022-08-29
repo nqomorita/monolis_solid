@@ -71,7 +71,6 @@ contains
     real(kdouble) :: time
     if(monolis_global_myrank() == 0 .and. is_debug)then
       write(*,"(a,i8,1pe12.5)")"* current time step: ", step, time
-      !write(flag,"(a,i8,1pe12.5)")"* current time step: ", step, time
     endif
   end subroutine soild_debug_time
 
@@ -82,19 +81,7 @@ contains
 
     if(monolis_global_myrank() == 0 .and. is_debug)then
       write(*,"(a,1pe10.3,a)")"  - "//trim(header)//" elapse time: ", time, " [sec]"
-      !write(flag,"(a,1pe10.3,a)")"  - "//trim(header)//" elapse time: ", time, " [sec]"
     endif
   end subroutine soild_plot_time
-
-  subroutine soild_plot_solver(iter, resid)
-    implicit none
-    integer(kint) :: iter
-    real(kdouble) :: resid
-
-    !if(myrank == 0)then
-    !  write(flag,"(a,i8)")     "  - monolis converge iter    :", iter
-    !  write(flag,"(a,1pe10.3)")"  - monolis converge residual:", resid
-    !endif
-  end subroutine soild_plot_solver
 
 end module mod_soild_debug

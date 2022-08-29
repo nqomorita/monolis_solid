@@ -2,16 +2,10 @@ module mod_soild_util
   use mod_monolis
 
   integer(kint), parameter :: ndof = 3
-  logical, save :: is_nl_geom = .false.
-  logical, save :: is_nl_mat = .false.
 
   type gaussdef
-    integer(kint) :: is_yield
     real(kdouble) :: strain(6)
     real(kdouble) :: stress(6)
-    real(kdouble) :: eq_pstrain
-    real(kdouble) :: eq_pstrain_back
-    real(kdouble) :: eq_pstrain_trial
   end type gaussdef
 
   type meshdef
@@ -23,13 +17,6 @@ module mod_soild_util
   end type meshdef
 
   type paramdef
-    !> for time step loop
-    integer(kint) :: cur_time_step
-
-    !> for NR loop
-    integer(kint) :: cur_nrstep
-    integer(kint) :: max_nrstep
-
     !> for boundary condition
     integer(kint) :: nbound
     integer(kint), allocatable :: ibound(:,:)
@@ -38,10 +25,6 @@ module mod_soild_util
     integer(kint) :: ncload
     integer(kint), allocatable :: icload(:,:)
     real(kdouble), allocatable :: cload(:)
-
-    !> for elast-plactis
-    real(kdouble), allocatable :: strain_table(:)
-    real(kdouble), allocatable :: stress_table(:)
 
     !> for material property
     real(kdouble) :: E, mu, rho
@@ -52,7 +35,6 @@ module mod_soild_util
     real(kdouble), allocatable :: x(:)  !> solution vector of Ax = b
     real(kdouble), allocatable :: b(:)  !> solution vector of Ax = b
     real(kdouble), allocatable :: u(:)  !> displacement
-    real(kdouble), allocatable :: du(:) !> delta displacement
     real(kdouble), allocatable :: q(:)  !> internal force
     real(kdouble), allocatable :: f(:)  !> external force
     real(kdouble), allocatable :: f_reaction(:) !> reaction force
@@ -88,7 +70,6 @@ contains
     allocate(var%emises (mesh%nelem), source = 0.0d0)
 
     allocate(var%u (3*mesh%nnode), source = 0.0d0)
-    allocate(var%du(3*mesh%nnode), source = 0.0d0)
     allocate(var%q (3*mesh%nnode), source = 0.0d0)
     allocate(var%f (3*mesh%nnode), source = 0.0d0)
     allocate(var%f_reaction (3*mesh%nnode), source = 0.0d0)
@@ -97,12 +78,8 @@ contains
 
     do i = 1, mesh%nelem
       do j = 1, 8
-        var%gauss(j,i)%is_yield = 0
         var%gauss(j,i)%strain = 0.0d0
         var%gauss(j,i)%stress = 0.0d0
-        var%gauss(j,i)%eq_pstrain = 0.0d0
-        var%gauss(j,i)%eq_pstrain_back = 0.0d0
-        var%gauss(j,i)%eq_pstrain_trial = 0.0d0
       enddo
     enddo
   end subroutine init_mesh
@@ -113,28 +90,6 @@ contains
 
     call monolis_get_nonzero_pattern(mat, mesh%nnode, 8, ndof, mesh%nelem, mesh%elem)
   end subroutine init_matrix
-
-  subroutine finalize_mesh(mesh, var)
-    implicit none
-    type(meshdef) :: mesh
-    type(vardef) :: var
-  end subroutine finalize_mesh
-
-  subroutine get_mises(s, mises)
-    implicit none
-    real(kdouble) :: mises, s(6)
-    real(kdouble) :: s11, s22, s33, s12, s23, s13, ps, smises
-
-    s11 = s(1)
-    s22 = s(2)
-    s33 = s(3)
-    s12 = s(4)
-    s23 = s(5)
-    s13 = s(6)
-    ps = (s11 + s22 + s33) / 3.0d0
-    smises = 0.5d0 * ((s11-ps)**2 + (s22-ps)**2 + (s33-ps)**2) + s12**2 + s23**2 + s13**2
-    mises  = dsqrt( 3.0d0 * smises )
-  end subroutine get_mises
 
   subroutine get_element_node_id(eid, elem, elemid)
     implicit none

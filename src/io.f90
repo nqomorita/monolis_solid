@@ -6,28 +6,11 @@ contains
   subroutine soild_input_param(param)
     implicit none
     type(paramdef) :: param
-    integer(kint) :: i, n
 
     open(10, file="input.dat", status='old')
-      read(10,*) i
-      if(i == 1) is_nl_geom = .true.
-      read(10,*) i
-      if(i == 1) is_nl_mat = .true.
-      read(10,*) param%max_nrstep
       read(10,*) param%E
       read(10,*) param%mu
       read(10,*) param%rho
-    close(10)
-
-    if(.not. is_nl_mat) return
-
-    open(10, file="input_elpl.dat", status='old')
-      read(10,*) n
-      allocate(param%strain_table(n), source = 0.0d0)
-      allocate(param%stress_table(n), source = 0.0d0)
-      do i = 1, n
-        read(10,*) param%strain_table(i), param%stress_table(i)
-      enddo
     close(10)
   end subroutine soild_input_param
 
@@ -35,9 +18,8 @@ contains
     implicit none
     type(meshdef) :: mesh
     type(paramdef) :: param
-    integer(kint) :: i, in, ndof
-    integer(kint), allocatable :: nid(:), perm(:)
-    character :: cnum*5, fname*100
+    integer(kint) :: ndof
+    character :: fname*100
 
     call soild_debug_header("soild_input_mesh")
 
@@ -52,19 +34,13 @@ contains
 
     fname = monolis_get_input_filename("load.dat")
     call monolis_input_condition(fname, param%ncload, ndof, param%icload, param%cload)
-
-    !call soild_debug_int("nnode", mesh%nnode)
-    !call soild_debug_int("nnode", mesh%nelem)
-    !call soild_debug_int("nbound", param%nbound)
-    !call soild_debug_int("ncload", param%ncload)
   end subroutine soild_input_mesh
 
-  subroutine outout_res(mesh, param, var)
+  subroutine outout_res(mesh, var)
     implicit none
-    type(paramdef) :: param
     type(meshdef) :: mesh
     type(vardef) :: var
-    integer(kint) :: i, id, nnode, nelem
+    integer(kint) :: i, nnode, nelem
     character :: cstep*5, cnum*5, output_dir*100
 
     call soild_debug_header("outout_res")
@@ -75,50 +51,9 @@ contains
     output_dir = "visual/"
     call system('if [ ! -d visual ]; then (echo "** create visual"; mkdir -p visual); fi')
 
-    open(20, file='visual/u.dat', status='replace')
-      write(20,"(i0)")nnode
-      do i = 1, nnode
-        write(20,"(1p3e22.14)")var%u(3*i-2), var%u(3*i-1), var%u(3*i)
-      enddo
-    close(20)
-
     call convert_to_real(mesh, var)
 
-    write(cstep,"(i5.5)")param%cur_time_step
-
-    if(monolis_global_myrank() == 0)then
-    open(20, file=trim(output_dir)//'result.'//trim(cstep)//'.pvtu', status='replace')
-      write(20,"(a)")'<?xml version="1.0"?>'
-      write(20,"(a)")'<VTKFile type="PUnstructuredGrid" version="1.0" byte_order="LittleEndian" header_type="UInt32">'
-      write(20,"(a)")'<PUnstructuredGrid>'
-      write(20,"(a)")'<PPoints>'
-      write(20,"(a)")'<PDataArray type="Float32" NumberOfComponents="3"/>'
-      write(20,"(a)")'</PPoints>'
-      write(20,"(a)")'<PCells>'
-      write(20,"(a)")'<PDataArray type="Int32" Name="connectivity" format="appended"/>'
-      write(20,"(a)")'<PDataArray type="Int32" Name="offsets" format="appended"/>'
-      write(20,"(a)")'<PDataArray type="Int32" Name="types" format="appended"/>'
-      write(20,"(a)")'</PCells>'
-      write(20,"(a)")'<PPointData>'
-      write(20,"(a)")'<PDataArray type="Float32" Name="disp" NumberOfComponents="3" format="appended"/>'
-      write(20,"(a)")'<PDataArray type="Float32" Name="nstrain" NumberOfComponents="6" format="appended"/>'
-      write(20,"(a)")'<PDataArray type="Float32" Name="nstress" NumberOfComponents="6" format="appended"/>'
-      write(20,"(a)")'<PDataArray type="Float32" Name="nmises" NumberOfComponents="1" format="appended"/>'
-      write(20,"(a)")'<PDataArray type="Float32" Name="nreaction" NumberOfComponents="3" format="appended"/>'
-      write(20,"(a)")'</PPointData>'
-      write(20,"(a)")'<PCellData>'
-      write(20,"(a)")'<PDataArray type="Float32" Name="estrain" NumberOfComponents="6" format="appended"/>'
-      write(20,"(a)")'<PDataArray type="Float32" Name="estress" NumberOfComponents="6" format="appended"/>'
-      write(20,"(a)")'<PDataArray type="Float32" Name="emises" NumberOfComponents="1" format="appended"/>'
-      write(20,"(a)")'</PCellData>'
-      do i = 0, monolis_global_commsize() - 1
-        write(cnum,"(i0)") i
-        write(20,"(a)")'<Piece Source="./result.'//trim(cstep)//'.'//trim(cnum)//'.vtu"/>'
-      enddo
-      write(20,"(a)")'</PUnstructuredGrid>'
-      write(20,"(a)")'</VTKFile>'
-    close(20)
-    endif
+    write(cstep,"(i5.5)") 0
 
     write(cnum,"(i0)")monolis_global_myrank()
 
@@ -232,7 +167,7 @@ contains
 
     do i = 1, nnode
       do j = 1, 3
-        if(dabs(var%u    (3*i-3+j)) < thr) var%u    (3*i-3+j) = 0.0d0
+        if(dabs(var%u(3*i-3+j)) < thr) var%u(3*i-3+j) = 0.0d0
         if(dabs(var%f_reaction(3*i-3+j)) < thr) var%f_reaction(3*i-3+j) = 0.0d0
       enddo
     enddo

@@ -10,7 +10,7 @@ contains
     type(meshdef) :: mesh
     type(vardef) :: var
     type(paramdef) :: param
-    integer(kint) :: i, icel
+    integer(kint) :: icel
     integer(kint) :: elem(8)
     real(kdouble) :: stiff(24,24), x(3,8)
 
@@ -18,13 +18,13 @@ contains
     call monolis_clear_mat_value(mat)
 
     do icel = 1, mesh%nelem
-      call get_element_node_id(icel, mesh%elem, elem)
       call C3D8_stiff(mesh, var, param, icel, stiff)
+      call get_element_node_id(icel, mesh%elem, elem)
       call monolis_add_matrix_to_sparse_matrix(mat, 8, elem, stiff)
     enddo
   end subroutine get_stiff_matrix
 
-  subroutine load_condition(var, param)
+  subroutine load_condition(param, var)
     implicit none
     type(paramdef) :: param
     type(vardef) :: var
@@ -43,9 +43,8 @@ contains
     enddo
   end subroutine load_condition
 
-  subroutine get_RHS(mesh, var)
+  subroutine get_RHS(var)
     implicit none
-    type(meshdef) :: mesh
     type(vardef) :: var
 
     call soild_debug_header("get_RHS")
@@ -53,13 +52,11 @@ contains
     var%B = var%f - var%q
   end subroutine get_RHS
 
-  subroutine bound_condition(mesh, param, var)
+  subroutine bound_condition(param, var)
     implicit none
-    type(meshdef) :: mesh
     type(paramdef) :: param
     type(vardef) :: var
-    integer(kint) :: i, in, dof, nb
-    integer(kint), allocatable :: indexR(:), itemR(:), permA(:)
+    integer(kint) :: in, dof, nb
     real(kdouble) :: val
 
     call soild_debug_header("bound_condition")
@@ -67,7 +64,7 @@ contains
     do nb = 1, param%nbound
       in  = param%ibound(1, nb)
       dof = param%ibound(2, nb)
-      val = param%bound(nb) - var%u(ndof*(in-1) + dof) - var%du(ndof*(in-1) + dof)
+      val = param%bound(nb)
       if(ndof < dof) stop "*** error: 3 < dof"
       call monolis_set_Dirichlet_bc(mat, var%B, in, dof, val)
     enddo

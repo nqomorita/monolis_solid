@@ -5,26 +5,6 @@ module mod_soild_update
 
 contains
 
-  subroutine delta_u_update(mesh, var)
-    implicit none
-    type(meshdef) :: mesh
-    type(vardef) :: var
-    integer(kint) :: i
-
-    call soild_debug_header("delta_u_update")
-    var%du = var%du + var%X
-  end subroutine delta_u_update
-
-  subroutine u_update(mesh, var)
-    implicit none
-    type(meshdef) :: mesh
-    type(vardef) :: var
-    integer(kint) :: i
-
-    call soild_debug_header("u_update")
-    var%u = var%u + var%du
-  end subroutine u_update
-
   subroutine init_nodal_strain_and_stress(mesh, var)
     implicit none
     type(meshdef) :: mesh
@@ -57,10 +37,10 @@ contains
     type(vardef) :: var
     type(paramdef) :: param
     integer(kint) :: i, j, in, icel
-    real(kdouble) :: func(8,8), inv(8,8), tmp
+    real(kdouble) :: inv(8,8), tmp
     real(kdouble) :: nstrain(8,6), nstress(8,6)
     real(kdouble) :: estrain(6),   estress(6)
-    real(kdouble) :: q(24), r(3)
+    real(kdouble) :: q(24)
     integer(kint), allocatable :: inode(:)
 
     call soild_debug_header("stress_update")
@@ -73,7 +53,7 @@ contains
 
     do icel = 1, mesh%nelem
       call C3D8_update(mesh, var, param, icel, q)
-      call C3D8_get_nodal_values(var, icel, inv, nstrain, nstress, estrain, estress)
+      call C3D8_get_nodal_and_elemental_values(var, icel, inv, nstrain, nstress, estrain, estress)
 
       do i = 1, 8
         in = mesh%elem(i,icel)
@@ -113,4 +93,19 @@ contains
     enddo
   end subroutine stress_update
 
+  subroutine get_mises(s, mises)
+    implicit none
+    real(kdouble) :: mises, s(6)
+    real(kdouble) :: s11, s22, s33, s12, s23, s13, ps, smises
+
+    s11 = s(1)
+    s22 = s(2)
+    s33 = s(3)
+    s12 = s(4)
+    s23 = s(5)
+    s13 = s(6)
+    ps = (s11 + s22 + s33) / 3.0d0
+    smises = 0.5d0 * ((s11-ps)**2 + (s22-ps)**2 + (s33-ps)**2) + s12**2 + s23**2 + s13**2
+    mises  = dsqrt( 3.0d0 * smises )
+  end subroutine get_mises
 end module mod_soild_update

@@ -10,12 +10,6 @@ METIS_DIR  = ./submodule/monolis
 METIS_INC  =
 METIS_LIB  = -L$(METIS_DIR)/lib -lmetis
 
-# mumps library
-#MUMPS_DIR  = ./
-#MUMPS_INC  = -I $(MUMPS_DIR)/include
-#MUMPS_LIB  = -L$(MUMPS_DIR)/lib -lpord -lmumps_common -ldmumps
-#-L/usr/local/lib -lscalapack -L/usr/local/Cellar/openblas/0.3.13/lib  -lopenblas
-
 # monolis library
 MONOLIS_DIR= ./submodule/monolis
 MONOLIS_INC= -I $(MONOLIS_DIR)/include
@@ -29,7 +23,7 @@ SRC_DIR  = ./src
 OBJ_DIR  = ./obj
 BIN_LIST = monolis_solid
 TARGET   = $(addprefix $(BIN_DIR)/, $(BIN_LIST))
-SRC_LIST = util.f90 debug.f90 io.f90 elpl.f90 element_C3D8.f90 matrix.f90 update.f90 solver.f90 analysis.f90 main.f90
+SRC_LIST = util.f90 debug.f90 io.f90 element_C3D8.f90 matrix.f90 update.f90 solver.f90 analysis.f90 main.f90
 SOURCES  = $(addprefix $(SRC_DIR)/, $(SRC_LIST))
 OBJS     = $(subst $(SRC_DIR), $(OBJ_DIR), $(SOURCES:.f90=.o))
 RM       = rm
