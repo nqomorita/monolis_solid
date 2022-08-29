@@ -14,7 +14,7 @@ module mod_soild_debug
   public :: soild_plot_solver
 
   integer(kint), parameter :: flag = 30
-  logical, save :: is_debug = .false.
+  logical, save :: is_debug = .true.
 
 contains
 
