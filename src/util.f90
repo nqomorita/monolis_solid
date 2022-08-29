@@ -51,7 +51,12 @@ module mod_soild_util
     real(kdouble), allocatable :: emises(:)
   end type vardef
 
-  type(monolis_structure) :: mat
+  type matdef
+    integer(kint) :: N
+    real(kdouble), allocatable :: A(:,:)
+    real(kdouble), allocatable :: x(:)
+    real(kdouble), allocatable :: b(:)
+  end type matdef
 
 contains
 
@@ -88,7 +93,6 @@ contains
     implicit none
     type(meshdef) :: mesh
 
-    call monolis_get_nonzero_pattern(mat, mesh%nnode, 8, ndof, mesh%nelem, mesh%elem)
   end subroutine init_matrix
 
   subroutine get_element_node_id(eid, elem, elemid)
