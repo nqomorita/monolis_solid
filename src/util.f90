@@ -35,9 +35,7 @@ module mod_soild_util
     real(kdouble), allocatable :: x(:)  !> solution vector of Ax = b
     real(kdouble), allocatable :: b(:)  !> solution vector of Ax = b
     real(kdouble), allocatable :: u(:)  !> displacement
-    real(kdouble), allocatable :: q(:)  !> internal force
     real(kdouble), allocatable :: f(:)  !> external force
-    real(kdouble), allocatable :: f_reaction(:) !> reaction force
 
     !> for results
     type(gaussdef), allocatable :: gauss(:,:)
@@ -75,9 +73,7 @@ contains
     allocate(var%emises (mesh%nelem), source = 0.0d0)
 
     allocate(var%u (3*mesh%nnode), source = 0.0d0)
-    allocate(var%q (3*mesh%nnode), source = 0.0d0)
     allocate(var%f (3*mesh%nnode), source = 0.0d0)
-    allocate(var%f_reaction (3*mesh%nnode), source = 0.0d0)
     allocate(var%x (3*mesh%nnode), source = 0.0d0)
     allocate(var%b (3*mesh%nnode), source = 0.0d0)
 
@@ -122,5 +118,20 @@ contains
       enddo
     enddo
   end subroutine get_element_node
+
+  subroutine get_noval_value(elem, var, x)
+    implicit none
+    integer(kint) :: i, in, j, elem(:)
+    real(kdouble) :: var(:), x(:,:)
+
+    do i = 1, 8
+      in = elem(i)
+      do j = 1, ndof
+        x(1,i) = var(3*in-2)
+        x(2,i) = var(3*in-1)
+        x(3,i) = var(3*in  )
+      enddo
+    enddo
+  end subroutine get_noval_value
 
 end module mod_soild_util

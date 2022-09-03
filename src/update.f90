@@ -40,7 +40,6 @@ contains
     real(kdouble) :: inv(8,8), tmp
     real(kdouble) :: nstrain(8,6), nstress(8,6)
     real(kdouble) :: estrain(6),   estress(6)
-    real(kdouble) :: q(24)
     integer(kint), allocatable :: inode(:)
 
     call soild_debug_header("stress_update")
@@ -49,10 +48,9 @@ contains
     call get_interpolation_matrix_C3D8(inv)
 
     allocate(inode(mesh%nnode), source = 0)
-    var%q = 0.0d0
 
     do icel = 1, mesh%nelem
-      call C3D8_update(mesh, var, param, icel, q)
+      call C3D8_update(mesh, var, param, icel)
       call C3D8_get_nodal_and_elemental_values(var, icel, inv, nstrain, nstress, estrain, estress)
 
       do i = 1, 8
@@ -62,9 +60,6 @@ contains
           var%nstrain(j,in) = var%nstrain(j,in) + nstrain(i,j)
           var%nstress(j,in) = var%nstress(j,in) + nstress(i,j)
         enddo
-        var%q(3*in-2) = var%q(3*in-2) + q(3*i-2)
-        var%q(3*in-1) = var%q(3*in-1) + q(3*i-1)
-        var%q(3*in  ) = var%q(3*in  ) + q(3*i  )
       enddo
 
       do j = 1, 6

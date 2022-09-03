@@ -25,6 +25,10 @@ contains
 
     ths = 1.0d-8
 
+    allocate(r(mat%N), source = 0.0d0)
+    allocate(p(mat%N), source = 0.0d0)
+    allocate(q(mat%N), source = 0.0d0)
+
     x = 0.0d0
     r = b
     rho  = 0.0d0

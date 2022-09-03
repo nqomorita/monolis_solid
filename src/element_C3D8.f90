@@ -16,12 +16,7 @@ contains
     wg    = 1.0d0
     stiff = 0.0d0
 
-    do i = 1, 8
-      in = mesh%elem(i,icel)
-      x(1,i) = mesh%node(1,in)
-      x(2,i) = mesh%node(2,in)
-      x(3,i) = mesh%node(3,in)
-    enddo
+    call get_element_node(mesh%elem(:,icel), mesh%node, x)
 
     do i = 1, 8
       call monolis_C3D8_integral_point(i, r)
@@ -218,38 +213,28 @@ contains
     enddo
   end subroutine C3D8_Kmat
 
-  subroutine C3D8_update(mesh, var, param, icel, q)
+  subroutine C3D8_update(mesh, var, param, icel)
     implicit none
     type(meshdef) :: mesh
     type(vardef) :: var
     type(paramdef) :: param
     integer(kint) :: i, in, icel
     real(kdouble) :: x0(3,8), u(3,8), r(3), dndx(8,3), D(6,6), B(6,24)
-    real(kdouble) :: strain(6), q(24), det
+    real(kdouble) :: strain(6), det
 
-    q = 0.0d0
-
-    do i = 1, 8
-      in = mesh%elem(i,icel)
-      x0(1,i) = mesh%node(1,in)
-      x0(2,i) = mesh%node(2,in)
-      x0(3,i) = mesh%node(3,in)
-      u(1,i)  = var%u(3*in-2)
-      u(2,i)  = var%u(3*in-1)
-      u(3,i)  = var%u(3*in  )
-    enddo
+    call get_element_node(mesh%elem(:,icel), mesh%node, x0)
+    call get_noval_value (mesh%elem(:,icel), var%u, u)
 
     do i = 1, 8
       call monolis_C3D8_integral_point(i, r)
       call monolis_C3D8_get_global_deriv(x0, r, dndx, det)
-      call C3D8_Bmat(dndx, B)
+      !call C3D8_Bmat(dndx, B)
       call C3D8_get_starian(u, dndx, strain)
       var%gauss(i,icel)%strain = strain
 
       call Dmat_elastic(param%E, param%mu, D)
       var%gauss(i,icel)%stress = matmul(D, var%gauss(i,icel)%strain)
-
-      q = q + matmul(var%gauss(i,icel)%stress, B)*det
+      !q = q + matmul(var%gauss(i,icel)%stress, B)*det
     enddo
   end subroutine C3D8_update
 
