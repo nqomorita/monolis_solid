@@ -17,12 +17,12 @@ contains
     real(kdouble) :: t1, t2, t3, t4, t5, t6
 
     call soild_write_header("solid_linear_static")
-    t1 = monolis_get_time_sync()
+    call cpu_time(t1)
 
     call init_mesh(mesh, var)
     call init_matrix(mesh)
 
-    t2 = monolis_get_time_sync()
+    call cpu_time(t2)
     call soild_plot_time("nonzero detection", t2 - t1)
 
     call get_stiff_matrix(mesh, var, param)
@@ -30,22 +30,22 @@ contains
     call get_RHS(var)
     call bound_condition(param, var)
 
-    t3 = monolis_get_time_sync()
+    call cpu_time(t3)
     call soild_plot_time("matrix generation", t3 - t2)
 
     call solver(mesh, var)
 
-    t4 = monolis_get_time_sync()
+    call cpu_time(t4)
     call soild_plot_time("solver", t4 - t3)
 
     call stress_update(mesh, var, param)
 
-    t5 = monolis_get_time_sync()
+    call cpu_time(t5)
     call soild_plot_time("stress calculation", t5 - t4)
 
     call outout_res(mesh, var)
 
-    t6 = monolis_get_time_sync()
+    call cpu_time(t6)
     call soild_plot_time("output", t6 - t5)
   end subroutine solid_linear_static
 end module mod_soild_analysis

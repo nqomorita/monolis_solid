@@ -10,18 +10,18 @@ program main
   type(vardef) :: var
   real(kdouble) :: t1, t2, t3
 
-  t1 = monolis_get_time()
+  call cpu_time(t1)
 
   !> FEM part
   call soild_write_header("Solid FEM")
   call soild_input_param(param)
   call soild_input_mesh(mesh, param)
 
-  t2 = monolis_get_time()
+  call cpu_time(t2)
   call soild_plot_time("input", t2 - t1)
 
   call solid_linear_static(mesh, param, var)
 
-  t3 = monolis_get_time()
+  call cpu_time(t3)
   call soild_plot_time("total ", t3 - t1)
 end program main

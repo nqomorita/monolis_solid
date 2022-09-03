@@ -6,12 +6,12 @@ contains
   subroutine soild_input_param(param)
     implicit none
     type(paramdef) :: param
+    character*16 :: fname
 
-    open(10, file="input.dat", status='old')
-      read(10,*) param%E
-      read(10,*) param%mu
-      read(10,*) param%rho
-    close(10)
+    fname = "cond.dat"
+    call get_input_param_r(fname, "E", param%E)
+    call get_input_param_r(fname, "mu", param%mu)
+    call get_input_param_r(fname, "rho", param%rho)
   end subroutine soild_input_param
 
   subroutine soild_input_mesh(mesh, param)
@@ -19,22 +19,85 @@ contains
     type(meshdef) :: mesh
     type(paramdef) :: param
     integer(kint) :: ndof
-    character :: fname*100
 
     call soild_debug_header("soild_input_mesh")
 
-    fname = monolis_get_input_filename("node.dat")
-    call monolis_input_mesh_node(fname, mesh%nnode, mesh%node)
+    call input_mesh_node("node.dat", mesh%nnode, mesh%node)
 
-    fname = monolis_get_input_filename("elem.dat")
-    call monolis_input_mesh_elem(fname, mesh%nelem, mesh%nbase_func, mesh%elem)
+    call input_mesh_elem("elem.dat", mesh%nelem, mesh%nbase_func, mesh%elem)
 
-    fname = monolis_get_input_filename("bc.dat")
-    call monolis_input_condition(fname, param%nbound, ndof, param%ibound, param%bound)
+    call input_condition("bc.dat", param%nbound, ndof, param%ibound, param%bound)
 
-    fname = monolis_get_input_filename("load.dat")
-    call monolis_input_condition(fname, param%ncload, ndof, param%icload, param%cload)
+    call input_condition("load.dat", param%ncload, ndof, param%icload, param%cload)
   end subroutine soild_input_mesh
+
+  subroutine get_input_param_r(fname, tag, var)
+    implicit none
+    character(*) :: fname, tag
+    character*128 :: ctemp
+    integer(kint) :: i, ierr, ivar
+    real(kdouble) :: var
+
+    open(10, file = trim(fname), status = 'old')
+      do
+        read(10, *, iostat = ierr) ctemp, ivar
+        if(0 /= ierr) exit
+        if(ctemp(1:1) == "#" .and. trim(ctemp(2:128)) == trim(tag))then
+          read(10, *) var
+          return
+        endif
+      enddo
+    close(10)
+
+    write(*,*)"** ERROR", trim(fname), " is not defined in input file."
+  end subroutine get_input_param_r
+
+  subroutine input_mesh_node(fname, nnode, node)
+    implicit none
+    integer(kint) :: nnode, i
+    real(kdouble), allocatable :: node(:,:)
+    character(*) :: fname
+
+    open(20, file = fname, status = "old")
+      read(20,*) nnode
+      allocate(node(3,nnode), source = 0.0d0)
+      do i = 1, nnode
+        read(20,*) node(1,i), node(2,i), node(3,i)
+      enddo
+    close(20)
+  end subroutine input_mesh_node
+
+  subroutine input_mesh_elem(fname, nelem, nbase, elem)
+    implicit none
+    integer(kint) :: nelem, nbase, i, j
+    integer(kint), allocatable :: elem(:,:)
+    character(*) :: fname
+
+    open(20, file = fname, status = "old")
+      read(20,*) nelem, nbase
+      allocate(elem(nbase,nelem), source = 0)
+      do i = 1, nelem
+        read(20,*) (elem(j,i), j = 1, nbase)
+      enddo
+    close(20)
+  end subroutine input_mesh_elem
+
+  subroutine input_condition(fname, ncond, ndof, icond, cond)
+    implicit none
+    integer(kint) :: ncond, ndof, i, j
+    integer(kint), allocatable :: icond(:,:)
+    real(kdouble), allocatable :: cond(:)
+    character(*) :: fname
+
+    open(20, file = fname, status = "old")
+      read(20,*) ncond, ndof
+      allocate(icond(2,ncond), source = 0)
+      allocate(cond(ncond), source = 0.0d0)
+      do i = 1, ncond
+        read(20,*) icond(1,i), icond(2,i), cond(i)
+      enddo
+    close(20)
+  end subroutine input_condition
 
   subroutine outout_res(mesh, var)
     implicit none
@@ -55,7 +118,7 @@ contains
 
     write(cstep,"(i5.5)") 0
 
-    write(cnum,"(i0)")monolis_global_myrank()
+    write(cnum,"(i0)") 0
 
     open(20, file=trim(output_dir)//'result.'//trim(cstep)//'.'//trim(cnum)//'.vtu', status='replace')
       write(20,"(a)")'<?xml version="1.0"?>'
