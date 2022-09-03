@@ -6,29 +6,28 @@ contains
   subroutine soild_input_param(param)
     implicit none
     type(paramdef) :: param
-    character*16 :: fname
+    integer(kint) :: ndof
 
-    fname = "cond.dat"
-    call get_input_param_r(fname, "E", param%E)
-    call get_input_param_r(fname, "mu", param%mu)
-    call get_input_param_r(fname, "rho", param%rho)
+    call get_input_param_r("cond.dat", "E", param%E)
+
+    call get_input_param_r("cond.dat", "mu", param%mu)
+
+    call get_input_param_r("cond.dat", "rho", param%rho)
+
+    call input_condition("bc.dat", param%nbound, ndof, param%ibound, param%bound)
+
+    call input_condition("load.dat", param%ncload, ndof, param%icload, param%cload)
   end subroutine soild_input_param
 
-  subroutine soild_input_mesh(mesh, param)
+  subroutine soild_input_mesh(mesh)
     implicit none
     type(meshdef) :: mesh
-    type(paramdef) :: param
-    integer(kint) :: ndof
 
     call soild_debug_header("soild_input_mesh")
 
     call input_mesh_node("node.dat", mesh%nnode, mesh%node)
 
     call input_mesh_elem("elem.dat", mesh%nelem, mesh%nbase_func, mesh%elem)
-
-    call input_condition("bc.dat", param%nbound, ndof, param%ibound, param%bound)
-
-    call input_condition("load.dat", param%ncload, ndof, param%icload, param%cload)
   end subroutine soild_input_mesh
 
   subroutine get_input_param_r(fname, tag, var)

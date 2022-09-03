@@ -8,32 +8,33 @@ module mod_soild_analysis
 
 contains
 
-  subroutine solid_linear_static(mesh, param, var)
+  subroutine solid_linear_static(mesh, param, var, mat)
     use mod_monolis_util
     implicit none
     type(meshdef) :: mesh
     type(paramdef) :: param
     type(vardef) :: var
+    type(matdef) :: mat
     real(kdouble) :: t1, t2, t3, t4, t5, t6
 
     call soild_write_header("solid_linear_static")
     call cpu_time(t1)
 
     call init_mesh(mesh, var)
-    call init_matrix(mesh)
+    call init_matrix(mesh, mat)
 
     call cpu_time(t2)
     call soild_plot_time("nonzero detection", t2 - t1)
 
-    call get_stiff_matrix(mesh, var, param)
+    call get_stiff_matrix(mesh, var, param, mat)
     call load_condition(param, var)
     call get_RHS(var)
-    call bound_condition(param, var)
+    call bound_condition(param, var, mat)
 
     call cpu_time(t3)
     call soild_plot_time("matrix generation", t3 - t2)
 
-    call solver(mesh, var)
+    call solver(mat, var)
 
     call cpu_time(t4)
     call soild_plot_time("solver", t4 - t3)

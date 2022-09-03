@@ -89,10 +89,15 @@ contains
     enddo
   end subroutine init_mesh
 
-  subroutine init_matrix(mesh)
+  subroutine init_matrix(mesh, mat)
     implicit none
     type(meshdef) :: mesh
+    type(matdef) :: mat
 
+    mat%N = 3*mesh%nnode
+    allocate(mat%A(mat%N,mat%N), source = 0.0d0)
+    allocate(mat%x(mat%N), source = 0.0d0)
+    allocate(mat%b(mat%N), source = 0.0d0)
   end subroutine init_matrix
 
   subroutine get_element_node_id(eid, elem, elemid)
