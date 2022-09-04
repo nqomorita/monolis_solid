@@ -32,8 +32,6 @@ module mod_soild_util
 
   type vardef
     !> for analysis
-    real(kdouble), allocatable :: x(:)  !> solution vector of Ax = b
-    real(kdouble), allocatable :: b(:)  !> solution vector of Ax = b
     real(kdouble), allocatable :: u(:)  !> displacement
     real(kdouble), allocatable :: f(:)  !> external force
 
@@ -74,8 +72,6 @@ contains
 
     allocate(var%u (3*mesh%nnode), source = 0.0d0)
     allocate(var%f (3*mesh%nnode), source = 0.0d0)
-    allocate(var%x (3*mesh%nnode), source = 0.0d0)
-    allocate(var%b (3*mesh%nnode), source = 0.0d0)
 
     do i = 1, mesh%nelem
       do j = 1, 8

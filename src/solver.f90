@@ -3,14 +3,13 @@ module mod_soild_solver
   use mod_soild_debug
 contains
 
-  subroutine solver(mat, var)
+  subroutine solver(mat)
     use mod_soild_debug
     implicit none
     type(matdef) :: mat
-    type(vardef) :: var
 
     call soild_debug_header("solver")
-    call solve_CG(mat, var%b, var%x)
+    call solve_CG(mat, mat%b, mat%x)
   end subroutine solver
 
 !> CG method
@@ -35,9 +34,15 @@ contains
     rho_ = 0.0d0
     norm0 = dsqrt(dot_product(r, r))
 
+    if(norm0 < ths)then
+      write(*,*)"** WARNING: L2 norm of RHS is smaller than 1.0e-8"
+      return
+    endif
+
     do iter = 1, mat%N
       rho = dot_product(r, r)
       norm = dsqrt(rho)
+      write(*,"(i8,1pe12.5)")iter, norm/norm0
       if(norm/norm0 < ths) exit
 
       if(1 < iter)then

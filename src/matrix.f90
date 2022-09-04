@@ -43,14 +43,15 @@ contains
     enddo
   end subroutine load_condition
 
-  subroutine get_RHS(var)
+  subroutine set_RHS(var, mat)
     implicit none
     type(vardef) :: var
+    type(matdef) :: mat
 
     call soild_debug_header("get_RHS")
 
-    var%B = var%f
-  end subroutine get_RHS
+    mat%B = var%f
+  end subroutine set_RHS
 
   subroutine bound_condition(param, var, mat)
     implicit none
@@ -76,9 +77,20 @@ contains
     implicit none
     type(matdef) :: mat
     integer(kint) :: elem(8)
-    integer(kint) :: i1, i2, j1, j2
+    integer(kint) :: i1, i2, j1, j2, m, n
     real(kdouble) :: stiff(24,24)
 
+    do i1 = 1, 8
+    do j1 = 1, 8
+      do i2 = 1, 3
+      do j2 = 1, 3
+        m = 3*(elem(j1)-1) + j2
+        n = 3*(elem(i1)-1) + i2
+        mat%A(m,n) = mat%A(m,n) + stiff(3*(j1-1)+j2, 3*(i1-1)+i2)
+      enddo
+      enddo
+    enddo
+    enddo
   end subroutine assemble_matrix
 
   subroutine add_Dirichlet_BC(mat, b, i, dof, val)
@@ -88,9 +100,9 @@ contains
     real(kdouble) :: val, b(:)
 
     pos = 3*(i-1)+dof
-    b = b - val*mat%A(pos,:)
-    mat%A(pos,:) = 0.0d0
+    b = b - val*mat%A(:,pos)
     mat%A(:,pos) = 0.0d0
+    mat%A(pos,:) = 0.0d0
     mat%A(pos,pos) = 1.0d0
     b(pos) = val
   end subroutine add_Dirichlet_BC

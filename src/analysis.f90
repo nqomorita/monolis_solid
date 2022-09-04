@@ -28,17 +28,18 @@ contains
 
     call get_stiff_matrix(mesh, var, param, mat)
     call load_condition(param, var)
-    call get_RHS(var)
+    call set_RHS(var, mat)
     call bound_condition(param, var, mat)
 
     call cpu_time(t3)
     call soild_plot_time("matrix generation", t3 - t2)
 
-    call solver(mat, var)
+    call solver(mat)
 
     call cpu_time(t4)
     call soild_plot_time("solver", t4 - t3)
 
+    call disp_update(mat, var)
     call stress_update(mesh, var, param)
 
     call cpu_time(t5)
