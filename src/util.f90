@@ -34,6 +34,8 @@ module mod_soild_util
     !> for analysis
     real(kdouble), allocatable :: u(:)  !> displacement
     real(kdouble), allocatable :: f(:)  !> external force
+    real(kdouble), allocatable :: x(:)  !> solution vector
+    real(kdouble), allocatable :: b(:)  !> RHS vector
 
     !> for results
     type(gaussdef), allocatable :: gauss(:,:)
@@ -50,8 +52,6 @@ module mod_soild_util
   type matdef
     integer(kint) :: N
     real(kdouble), allocatable :: A(:,:)
-    real(kdouble), allocatable :: x(:)
-    real(kdouble), allocatable :: b(:)
   end type matdef
 
 contains
@@ -72,6 +72,8 @@ contains
 
     allocate(var%u (3*mesh%nnode), source = 0.0d0)
     allocate(var%f (3*mesh%nnode), source = 0.0d0)
+    allocate(var%x (3*mesh%nnode), source = 0.0d0)
+    allocate(var%b (3*mesh%nnode), source = 0.0d0)
 
     do i = 1, mesh%nelem
       do j = 1, 8
@@ -88,8 +90,6 @@ contains
 
     mat%N = 3*mesh%nnode
     allocate(mat%A(mat%N,mat%N), source = 0.0d0)
-    allocate(mat%x(mat%N), source = 0.0d0)
-    allocate(mat%b(mat%N), source = 0.0d0)
   end subroutine init_matrix
 
   subroutine get_element_node_id(eid, elem, elemid)

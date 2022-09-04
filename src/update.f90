@@ -30,11 +30,10 @@ contains
     call monolis_get_inverse_matrix(8, func, inv)
   end subroutine get_interpolation_matrix_C3D8
 
-  subroutine disp_update(mat, var)
+  subroutine disp_update(var)
     implicit none
-    type(matdef) :: mat
     type(vardef) :: var
-    var%u = mat%x
+    var%u = var%x
   end subroutine disp_update
 
   subroutine stress_update(mesh, var, param)

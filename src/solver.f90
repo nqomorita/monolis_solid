@@ -3,13 +3,14 @@ module mod_soild_solver
   use mod_soild_debug
 contains
 
-  subroutine solver(mat)
+  subroutine solver(mat, var)
     use mod_soild_debug
     implicit none
     type(matdef) :: mat
+    type(vardef) :: var
 
     call soild_debug_header("solver")
-    call solve_CG(mat, mat%b, mat%x)
+    call solve_CG(mat, var%b, var%x)
   end subroutine solver
 
 !> CG method

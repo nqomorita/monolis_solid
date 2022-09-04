@@ -43,14 +43,13 @@ contains
     enddo
   end subroutine load_condition
 
-  subroutine set_RHS(var, mat)
+  subroutine set_RHS(var)
     implicit none
     type(vardef) :: var
-    type(matdef) :: mat
 
     call soild_debug_header("get_RHS")
 
-    mat%B = var%f
+    var%b = var%f
   end subroutine set_RHS
 
   subroutine bound_condition(param, var, mat)
@@ -68,7 +67,7 @@ contains
       dof = param%ibound(2, nb)
       val = param%bound(nb)
       if(ndof < dof) stop "*** error: 3 < dof"
-      call add_Dirichlet_BC(mat, mat%b, i, dof, val)
+      call add_Dirichlet_BC(mat, var%b, i, dof, val)
     enddo
   end subroutine bound_condition
 
