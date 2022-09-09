@@ -8,21 +8,23 @@ program main
   type(meshdef) :: mesh
   type(paramdef) :: param
   type(vardef) :: var
-  type(matdef) :: mat
+  type(monolis_structure) :: mat
   real(kdouble) :: t1, t2, t3
 
-  call cpu_time(t1)
+  call monolis_global_initialize()
+  call monolis_initialize(mat, "./")
+  t1 = monolis_get_time_sync()
 
   !> FEM part
   call soild_write_header("Solid FEM")
   call soild_input_mesh(mesh)
   call soild_input_param(param)
 
-  call cpu_time(t2)
+  t2 = monolis_get_time_sync()
   call soild_plot_time("input", t2 - t1)
 
   call solid_linear_static(mesh, param, var, mat)
 
-  call cpu_time(t3)
+  t3 = monolis_get_time_sync()
   call soild_plot_time("total ", t3 - t1)
 end program main

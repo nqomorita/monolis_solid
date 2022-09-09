@@ -14,7 +14,7 @@ contains
     type(meshdef) :: mesh
     type(paramdef) :: param
     type(vardef) :: var
-    type(matdef) :: mat
+    type(monolis_structure) :: mat
     real(kdouble) :: t1, t2, t3, t4, t5, t6
 
     call soild_write_header("solid_linear_static")

@@ -49,11 +49,6 @@ module mod_soild_util
     real(kdouble), allocatable :: emises(:)
   end type vardef
 
-  type matdef
-    integer(kint) :: N
-    real(kdouble), allocatable :: A(:,:)
-  end type matdef
-
 contains
 
   subroutine init_mesh(mesh, var)
@@ -86,10 +81,9 @@ contains
   subroutine init_matrix(mesh, mat)
     implicit none
     type(meshdef) :: mesh
-    type(matdef) :: mat
+    type(monolis_structure) :: mat
 
-    mat%N = 3*mesh%nnode
-    allocate(mat%A(mat%N,mat%N), source = 0.0d0)
+    call monolis_get_nonzero_pattern(mat, mesh%nnode, mesh%nbase_func, 3, mesh%nelem, mesh%elem)
   end subroutine init_matrix
 
   subroutine get_element_node_id(eid, elem, elemid)

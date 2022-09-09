@@ -7,6 +7,7 @@ contains
     implicit none
     type(paramdef) :: param
     integer(kint) :: ndof
+    character :: fname*100
 
     call get_input_param_r("cond.dat", "E", param%E)
 
@@ -14,20 +15,25 @@ contains
 
     call get_input_param_r("cond.dat", "rho", param%rho)
 
-    call input_condition("bc.dat", param%nbound, ndof, param%ibound, param%bound)
+    fname = monolis_get_input_filename("bc.dat")
+    call monolis_input_condition(fname, param%nbound, ndof, param%ibound, param%bound)
 
-    call input_condition("load.dat", param%ncload, ndof, param%icload, param%cload)
+    fname = monolis_get_input_filename("load.dat")
+    call monolis_input_condition(fname, param%ncload, ndof, param%icload, param%cload)
   end subroutine soild_input_param
 
   subroutine soild_input_mesh(mesh)
     implicit none
     type(meshdef) :: mesh
+    character :: fname*100
 
     call soild_debug_header("soild_input_mesh")
 
-    call input_mesh_node("node.dat", mesh%nnode, mesh%node)
+    fname = monolis_get_input_filename("node.dat")
+    call monolis_input_mesh_node(fname, mesh%nnode, mesh%node)
 
-    call input_mesh_elem("elem.dat", mesh%nelem, mesh%nbase_func, mesh%elem)
+    fname = monolis_get_input_filename("elem.dat")
+    call monolis_input_mesh_elem(fname, mesh%nelem, mesh%nbase_func, mesh%elem)
   end subroutine soild_input_mesh
 
   subroutine get_input_param_r(fname, tag, var)
@@ -50,53 +56,6 @@ contains
 
     write(*,*)"** ERROR", trim(fname), " is not defined in input file."
   end subroutine get_input_param_r
-
-  subroutine input_mesh_node(fname, nnode, node)
-    implicit none
-    integer(kint) :: nnode, i
-    real(kdouble), allocatable :: node(:,:)
-    character(*) :: fname
-
-    open(20, file = fname, status = "old")
-      read(20,*) nnode
-      allocate(node(3,nnode), source = 0.0d0)
-      do i = 1, nnode
-        read(20,*) node(1,i), node(2,i), node(3,i)
-      enddo
-    close(20)
-  end subroutine input_mesh_node
-
-  subroutine input_mesh_elem(fname, nelem, nbase, elem)
-    implicit none
-    integer(kint) :: nelem, nbase, i, j
-    integer(kint), allocatable :: elem(:,:)
-    character(*) :: fname
-
-    open(20, file = fname, status = "old")
-      read(20,*) nelem, nbase
-      allocate(elem(nbase,nelem), source = 0)
-      do i = 1, nelem
-        read(20,*) (elem(j,i), j = 1, nbase)
-      enddo
-    close(20)
-  end subroutine input_mesh_elem
-
-  subroutine input_condition(fname, ncond, ndof, icond, cond)
-    implicit none
-    integer(kint) :: ncond, ndof, i, j
-    integer(kint), allocatable :: icond(:,:)
-    real(kdouble), allocatable :: cond(:)
-    character(*) :: fname
-
-    open(20, file = fname, status = "old")
-      read(20,*) ncond, ndof
-      allocate(icond(2,ncond), source = 0)
-      allocate(cond(ncond), source = 0.0d0)
-      do i = 1, ncond
-        read(20,*) icond(1,i), icond(2,i), cond(i)
-      enddo
-    close(20)
-  end subroutine input_condition
 
   subroutine outout_res(mesh, var)
     implicit none
