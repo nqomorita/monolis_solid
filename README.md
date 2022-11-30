@@ -16,5 +16,5 @@
 
 ## manual
 
-[manual](https://morita.gitlab.io/monolis_solid)
+[manual](https://mmlab_tsukuba.gitlab.io/morita_lab/monolis_solid/)
 
