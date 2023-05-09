@@ -70,6 +70,7 @@ module mod_soild_util
   end type vardef
 
   type(monolis_structure) :: mat
+  type(monolis_com) :: com
 
 contains
 
@@ -111,7 +112,7 @@ contains
     implicit none
     type(meshdef) :: mesh
 
-    call monolis_get_nonzero_pattern(mat, mesh%nnode, 8, ndof, mesh%nelem, mesh%elem)
+    call monolis_get_nonzero_pattern_by_simple_mesh_R(mat, mesh%nnode, 8, ndof, mesh%nelem, mesh%elem)
   end subroutine init_matrix
 
   subroutine finalize_mesh(mesh, var)

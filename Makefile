@@ -7,7 +7,7 @@ CPP       = -cpp
 
 # metis library
 METIS_DIR  = ./submodule/monolis
-METIS_INC  =
+METIS_INC  = -I $(METIS_DIR)/include
 METIS_LIB  = -L$(METIS_DIR)/lib -lmetis
 
 # mumps library
@@ -19,7 +19,7 @@ METIS_LIB  = -L$(METIS_DIR)/lib -lmetis
 # monolis library
 MONOLIS_DIR= ./submodule/monolis
 MONOLIS_INC= -I $(MONOLIS_DIR)/include
-MONOLIS_LIB= -L$(MONOLIS_DIR)/lib -lmonolis
+MONOLIS_LIB= -L$(MONOLIS_DIR)/lib -lmonolis_solver -lgedatsu -lmonolis_utils
 
 LIBS     = $(MONOLIS_LIB) $(MUMPS_LIB) $(METIS_LIB)
 INCLUDE  = -I ./include $(MONOLIS_INC)

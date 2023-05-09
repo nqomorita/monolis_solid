@@ -15,12 +15,12 @@ contains
     real(kdouble) :: stiff(24,24), x(3,8)
 
     call soild_debug_header("get_stiff_matrix")
-    call monolis_clear_mat_value(mat)
+    call monolis_clear_mat_value_R(mat)
 
     do icel = 1, mesh%nelem
       call get_element_node_id(icel, mesh%elem, elem)
       call C3D8_stiff(mesh, var, param, icel, stiff)
-      call monolis_add_matrix_to_sparse_matrix(mat, 8, elem, stiff)
+      call monolis_add_matrix_to_sparse_matrix_R(mat, 8, elem, stiff)
     enddo
   end subroutine get_stiff_matrix
 
@@ -69,7 +69,7 @@ contains
       dof = param%ibound(2, nb)
       val = param%bound(nb) - var%u(ndof*(in-1) + dof) - var%du(ndof*(in-1) + dof)
       if(ndof < dof) stop "*** error: 3 < dof"
-      call monolis_set_Dirichlet_bc(mat, var%B, in, dof, val)
+      call monolis_set_Dirichlet_bc_R(mat, var%B, in, dof, val)
     enddo
   end subroutine bound_condition
 end module mod_soild_matrix

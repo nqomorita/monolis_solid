@@ -11,7 +11,9 @@ program main
   real(kdouble) :: t1, t2, t3
 
   call monolis_global_initialize()
-  call monolis_initialize(mat, "./")
+  call monolis_initialize(mat)
+  call monolis_com_initialize_by_parted_files(com, monolis_mpi_get_global_comm(), &
+    & MONOLIS_DEFAULT_TOP_DIR, MONOLIS_DEFAULT_PART_DIR, "node.dat")
   t1 = monolis_get_time()
 
   !> FEM part

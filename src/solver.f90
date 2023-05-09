@@ -4,8 +4,7 @@ module mod_soild_solver
 contains
 
   subroutine solver(mesh, var)
-    use mod_monolis_util
-    use mod_monolis_solve
+    use mod_monolis
     use mod_soild_debug
     implicit none
     type(meshdef) :: mesh
@@ -13,18 +12,18 @@ contains
 
     call soild_debug_header("solver")
 
-    call monolis_param_set_method(mat, monolis_iter_CG)
-    call monolis_param_set_precond(mat, monolis_prec_SOR)
-    call monolis_param_set_maxiter(mat, 100000)
-    call monolis_param_set_tol(mat, 1.0d-8)
+    call monolis_set_method(mat, monolis_iter_CG)
+    call monolis_set_precond(mat, monolis_prec_DIAG)
+    call monolis_set_maxiter(mat, 100000)
+    call monolis_set_tolerance(mat, 1.0d-8)
     !call monolis_param_set_is_scaling(mat, .false.)
     !call monolis_param_set_is_reordering(mat, .false.)
     !call monolis_param_set_is_debug(mat, .true.)
-    call monolis_param_set_show_time(mat, .true.)
-    call monolis_param_set_show_iterlog(mat, .true.)
-    call monolis_param_set_show_summary(mat, .true.)
+    call monolis_show_timelog(mat, .true.)
+    call monolis_show_iterlog(mat, .true.)
+    call monolis_show_summary(mat, .true.)
 
-    call monolis_solve(mat, var%B, var%X)
+    call monolis_solve_R(mat, com, var%B, var%X)
 !    call soild_plot_solver(mat%PRM%curiter, mat%PRM%curresid)
 
 !    if(mat%PRM%curresid > mat%PRM%tol)then
@@ -34,8 +33,6 @@ contains
   end subroutine solver
 
   function is_convergence(mesh, var, step)
-    use mod_monolis_util
-    use mod_monolis_linalg
     implicit none
     type(meshdef) :: mesh
     type(vardef) :: var
@@ -48,8 +45,8 @@ contains
 
     bnrm = 0.0d0
     rnrm = 0.0d0
-    call monolis_inner_product_R(mat%COM, mesh%nnode, ndof, var%q, var%q, qnrm)
-    call monolis_inner_product_R(mat%COM, mesh%nnode, ndof, var%B, var%B, bnrm)
+    call monolis_inner_product_R(mat, com, ndof, var%q, var%q, qnrm)
+    call monolis_inner_product_R(mat, com, ndof, var%B, var%B, bnrm)
     bnrm = bnrm
 
     if(step == 1)then
