@@ -47,7 +47,7 @@ contains
       call monolis_C3D8_integral_point(i, r)
       call monolis_C3D8_shapefunc(r, func(i,:))
     enddo
-    call monolis_get_inverse_matrix(8, func, inv)
+    call monolis_get_inverse_matrix_R(8, func, inv)
   end subroutine get_interpolation_matrix_C3D8
 
   subroutine stress_update(mesh, var, param)

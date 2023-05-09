@@ -1,6 +1,7 @@
 module mod_soild_io
   use mod_soild_util
   use mod_soild_debug
+
 contains
 
   subroutine soild_input_param(param)
@@ -41,17 +42,17 @@ contains
 
     call soild_debug_header("soild_input_mesh")
 
-    fname = monolis_get_input_filename("node.dat")
-    call monolis_input_mesh_node(fname, mesh%nnode, mesh%node)
+    fname = monolis_get_global_input_file_name(MONOLIS_DEFAULT_TOP_DIR, MONOLIS_DEFAULT_PART_DIR, "node.dat")
+    call monolis_input_node(fname, mesh%nnode, mesh%node)
 
-    fname = monolis_get_input_filename("elem.dat")
-    call monolis_input_mesh_elem(fname, mesh%nelem, mesh%nbase_func, mesh%elem)
+    fname = monolis_get_global_input_file_name(MONOLIS_DEFAULT_TOP_DIR, MONOLIS_DEFAULT_PART_DIR, "elem.dat")
+    call monolis_input_elem(fname, mesh%nelem, mesh%nbase_func, mesh%elem)
 
-    fname = monolis_get_input_filename("bc.dat")
-    call monolis_input_condition(fname, param%nbound, ndof, param%ibound, param%bound)
+    fname = monolis_get_global_input_file_name(MONOLIS_DEFAULT_TOP_DIR, MONOLIS_DEFAULT_PART_DIR, "bc.dat")
+    call monolis_input_bc_R(fname, param%nbound, ndof, param%ibound, param%bound)
 
-    fname = monolis_get_input_filename("load.dat")
-    call monolis_input_condition(fname, param%ncload, ndof, param%icload, param%cload)
+    fname = monolis_get_global_input_file_name(MONOLIS_DEFAULT_TOP_DIR, MONOLIS_DEFAULT_PART_DIR, "load.dat")
+    call monolis_input_bc_R(fname, param%ncload, ndof, param%icload, param%cload)
 
     !call soild_debug_int("nnode", mesh%nnode)
     !call soild_debug_int("nnode", mesh%nelem)
@@ -75,7 +76,12 @@ contains
     output_dir = "visual/"
     call system('if [ ! -d visual ]; then (echo "** create visual"; mkdir -p visual); fi')
 
+    if(monolis_mpi_get_global_comm_size() == 1)then
     open(20, file='visual/u.dat', status='replace')
+    else
+    write(cnum,"(i0)")monolis_mpi_get_global_my_rank()
+    open(20, file='visual/u.dat.'//trim(cnum), status='replace')
+    endif
       write(20,"(i0)")nnode
       do i = 1, nnode
         write(20,"(1p3e22.14)")var%u(3*i-2), var%u(3*i-1), var%u(3*i)
@@ -86,7 +92,7 @@ contains
 
     write(cstep,"(i5.5)")param%cur_time_step
 
-    if(monolis_global_myrank() == 0)then
+    if(monolis_mpi_get_global_my_rank() == 0)then
     open(20, file=trim(output_dir)//'result.'//trim(cstep)//'.pvtu', status='replace')
       write(20,"(a)")'<?xml version="1.0"?>'
       write(20,"(a)")'<VTKFile type="PUnstructuredGrid" version="1.0" byte_order="LittleEndian" header_type="UInt32">'
@@ -111,7 +117,7 @@ contains
       write(20,"(a)")'<PDataArray type="Float32" Name="estress" NumberOfComponents="6" format="appended"/>'
       write(20,"(a)")'<PDataArray type="Float32" Name="emises" NumberOfComponents="1" format="appended"/>'
       write(20,"(a)")'</PCellData>'
-      do i = 0, monolis_global_commsize() - 1
+      do i = 0, monolis_mpi_get_global_comm_size() - 1
         write(cnum,"(i0)") i
         write(20,"(a)")'<Piece Source="./result.'//trim(cstep)//'.'//trim(cnum)//'.vtu"/>'
       enddo
@@ -120,7 +126,7 @@ contains
     close(20)
     endif
 
-    write(cnum,"(i0)")monolis_global_myrank()
+    write(cnum,"(i0)")monolis_mpi_get_global_my_rank()
 
     open(20, file=trim(output_dir)//'result.'//trim(cstep)//'.'//trim(cnum)//'.vtu', status='replace')
       write(20,"(a)")'<?xml version="1.0"?>'
