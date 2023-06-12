@@ -83,7 +83,7 @@ contains
     type(meshdef) :: mesh
     type(monolis_structure) :: mat
 
-    call monolis_get_nonzero_pattern(mat, mesh%nnode, mesh%nbase_func, 3, mesh%nelem, mesh%elem)
+    call monolis_get_nonzero_pattern_by_simple_mesh_R(mat, mesh%nnode, mesh%nbase_func, 3, mesh%nelem, mesh%elem)
   end subroutine init_matrix
 
   subroutine get_element_node_id(eid, elem, elemid)

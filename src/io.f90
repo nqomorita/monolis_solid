@@ -15,11 +15,11 @@ contains
 
     call get_input_param_r("cond.dat", "rho", param%rho)
 
-    fname = monolis_get_input_filename("bc.dat")
-    call monolis_input_condition(fname, param%nbound, ndof, param%ibound, param%bound)
+    fname = monolis_get_global_input_file_name(MONOLIS_DEFAULT_TOP_DIR, MONOLIS_DEFAULT_PART_DIR, "bc.dat")
+    call monolis_input_bc_R(fname, param%nbound, ndof, param%ibound, param%bound)
 
-    fname = monolis_get_input_filename("load.dat")
-    call monolis_input_condition(fname, param%ncload, ndof, param%icload, param%cload)
+    fname = monolis_get_global_input_file_name(MONOLIS_DEFAULT_TOP_DIR, MONOLIS_DEFAULT_PART_DIR, "load.dat")
+    call monolis_input_bc_R(fname, param%ncload, ndof, param%icload, param%cload)
   end subroutine soild_input_param
 
   subroutine soild_input_mesh(mesh)
@@ -29,11 +29,11 @@ contains
 
     call soild_debug_header("soild_input_mesh")
 
-    fname = monolis_get_input_filename("node.dat")
-    call monolis_input_mesh_node(fname, mesh%nnode, mesh%node)
+    fname = monolis_get_global_input_file_name(MONOLIS_DEFAULT_TOP_DIR, MONOLIS_DEFAULT_PART_DIR, "node.dat")
+    call monolis_input_node(fname, mesh%nnode, mesh%node)
 
-    fname = monolis_get_input_filename("elem.dat")
-    call monolis_input_mesh_elem(fname, mesh%nelem, mesh%nbase_func, mesh%elem)
+    fname = monolis_get_global_input_file_name(MONOLIS_DEFAULT_TOP_DIR, MONOLIS_DEFAULT_PART_DIR, "elem.dat")
+    call monolis_input_elem(fname, mesh%nelem, mesh%nbase_func, mesh%elem)
   end subroutine soild_input_mesh
 
   subroutine get_input_param_r(fname, tag, var)
