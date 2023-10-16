@@ -54,7 +54,7 @@ contains
       call monolis_C3D8_integral_point(i, r)
       call monolis_C3D8_shapefunc(r, func)
       call monolis_C3D8_get_global_deriv(x, r, dndx, det)
-      call C3D8_Mmat(param, func, wg, det, mass)
+!      call C3D8_Mmat(param, func, wg, det, mass)
     enddo
   end subroutine C3D8_mass
 
@@ -88,14 +88,11 @@ contains
     enddo
   end subroutine get_lumped_mass
 
-  subroutine C3D8_Mmat(param, func, wg, det, mass)
+  subroutine C3D8_Mmat(rho, func, wg, det, mass)
     implicit none
-    type(paramdef) :: param
     integer(kint) :: i, j, k
     real(kdouble) :: mass(24,24), D(3,3), DN(3,24), wg, det, rho
     real(kdouble) :: func(8), N(3,24)
-
-    rho = param%rho
 
     N = 0.0d0
     do j = 1, 8
@@ -214,11 +211,11 @@ contains
     type(gaussdef) :: gauss
     real(kdouble) :: D(6,6)
 
-    if(is_nl_mat)then
-      call Dmat_elast_plastic(param, gauss, D)
-    else
-      call Dmat_elastic(param%E, param%mu, D)
-    endif
+!    if(is_nl_mat)then
+!      call Dmat_elast_plastic(param, gauss, D)
+!    else
+!      call Dmat_elastic(param%E, param%mu, D)
+!    endif
   end subroutine C3D8_Dmat
 
   subroutine C3D8_Kmat(D, B, wg, det, stress, dndx, stiff)
@@ -302,12 +299,12 @@ contains
       call C3D8_get_starian(u, dndx, strain)
       var%gauss(i,icel)%strain = strain
 
-      call Dmat_elastic(param%E, param%mu, D)
+!      call Dmat_elastic(param%E, param%mu, D)
       var%gauss(i,icel)%stress = matmul(D, var%gauss(i,icel)%strain)
 
-      if(is_nl_mat)then
-        call backward_Euler(param, var%gauss(i,icel))
-      endif
+!      if(is_nl_mat)then
+!        call backward_Euler(param, var%gauss(i,icel))
+!      endif
 
       q = q + matmul(var%gauss(i,icel)%stress, B)*det
     enddo

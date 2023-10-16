@@ -1,7 +1,7 @@
 module mod_soild_util
   use mod_monolis
 
-  integer(kint), parameter :: ndof = 3
+  integer(kint), parameter :: n_dof = 3
   logical, save :: is_nl_geom = .false.
   logical, save :: is_nl_mat = .false.
 
@@ -15,9 +15,9 @@ module mod_soild_util
   end type gaussdef
 
   type meshdef
-    integer(kint) :: nnode
-    integer(kint) :: nelem
-    integer(kint) :: nbase_func
+    integer(kint) :: n_node
+    integer(kint) :: n_elem
+    integer(kint) :: n_base_func
     real(kdouble), allocatable :: node(:,:)
     integer(kint), allocatable :: elem(:,:)
   end type meshdef
@@ -27,8 +27,8 @@ module mod_soild_util
     integer(kint) :: cur_time_step
 
     !> for NR loop
-    integer(kint) :: cur_nrstep
-    integer(kint) :: max_nrstep
+    integer(kint) :: cur_nr_step
+    integer(kint) :: max_nr_step
 
     !> for boundary condition
     integer(kint) :: nbound
@@ -38,14 +38,16 @@ module mod_soild_util
     integer(kint) :: ncload
     integer(kint), allocatable :: icload(:,:)
     real(kdouble), allocatable :: cload(:)
+  end type paramdef
+
+  type matdef
+    !> for material property
+    real(kdouble) :: E, mu, rho
 
     !> for elast-plactis
     real(kdouble), allocatable :: strain_table(:)
     real(kdouble), allocatable :: stress_table(:)
-
-    !> for material property
-    real(kdouble) :: E, mu, rho
-  end type paramdef
+  end type matdef
 
   type vardef
     !> for analysis
@@ -59,6 +61,7 @@ module mod_soild_util
 
     !> for results
     type(gaussdef), allocatable :: gauss(:,:)
+
     !> Nodal components
     real(kdouble), allocatable :: nstrain(:,:)
     real(kdouble), allocatable :: nstress(:,:)
@@ -74,30 +77,58 @@ module mod_soild_util
 
 contains
 
+  subroutine init_global()
+    implicit none
+    call monolis_global_initialize()
+    call monolis_initialize(mat)
+    call monolis_com_initialize_by_parted_files(com, monolis_mpi_get_global_comm(), &
+      & MONOLIS_DEFAULT_TOP_DIR, MONOLIS_DEFAULT_PART_DIR, "node.dat")
+  end subroutine init_global
+
+  subroutine finalize_global()
+    implicit none
+    call monolis_finalize(mat)
+    call monolis_com_finalize(com)
+    call monolis_global_finalize()
+  end subroutine finalize_global
+
   subroutine init_mesh(mesh, var)
     implicit none
     type(meshdef) :: mesh
     type(vardef) :: var
-    integer(kint) :: i, j
 
-    allocate(var%gauss(8, mesh%nelem))
-    allocate(var%nstrain(6, mesh%nnode), source = 0.0d0)
-    allocate(var%nstress(6, mesh%nnode), source = 0.0d0)
-    allocate(var%nmises (mesh%nnode), source = 0.0d0)
-    allocate(var%estrain(6, mesh%nelem), source = 0.0d0)
-    allocate(var%estress(6, mesh%nelem), source = 0.0d0)
-    allocate(var%emises (mesh%nelem), source = 0.0d0)
+    allocate(var%nstrain(6, mesh%n_node), source = 0.0d0)
+    allocate(var%nstress(6, mesh%n_node), source = 0.0d0)
+    allocate(var%nmises (mesh%n_node), source = 0.0d0)
+    allocate(var%estrain(6, mesh%n_elem), source = 0.0d0)
+    allocate(var%estress(6, mesh%n_elem), source = 0.0d0)
+    allocate(var%emises (mesh%n_elem), source = 0.0d0)
 
-    allocate(var%u (3*mesh%nnode), source = 0.0d0)
-    allocate(var%du(3*mesh%nnode), source = 0.0d0)
-    allocate(var%q (3*mesh%nnode), source = 0.0d0)
-    allocate(var%f (3*mesh%nnode), source = 0.0d0)
-    allocate(var%f_reaction (3*mesh%nnode), source = 0.0d0)
-    allocate(var%x (3*mesh%nnode), source = 0.0d0)
-    allocate(var%b (3*mesh%nnode), source = 0.0d0)
+    allocate(var%u (3*mesh%n_node), source = 0.0d0)
+    allocate(var%du(3*mesh%n_node), source = 0.0d0)
+    allocate(var%q (3*mesh%n_node), source = 0.0d0)
+    allocate(var%f (3*mesh%n_node), source = 0.0d0)
+    allocate(var%f_reaction (3*mesh%n_node), source = 0.0d0)
+    allocate(var%x (3*mesh%n_node), source = 0.0d0)
+    allocate(var%b (3*mesh%n_node), source = 0.0d0)
+  end subroutine init_mesh
 
-    do i = 1, mesh%nelem
-      do j = 1, 8
+  subroutine finalize_mesh(mesh, var)
+    implicit none
+    type(meshdef) :: mesh
+    type(vardef) :: var
+  end subroutine finalize_mesh
+
+  subroutine init_gauss_point(mesh, var, n_gauss_point)
+    implicit none
+    type(meshdef) :: mesh
+    type(vardef) :: var
+    integer(kint) :: n_gauss_point, i, j
+
+    allocate(var%gauss(n_gauss_point, mesh%n_elem))
+
+    do i = 1, mesh%n_elem
+      do j = 1, n_gauss_point
         var%gauss(j,i)%is_yield = 0
         var%gauss(j,i)%strain = 0.0d0
         var%gauss(j,i)%stress = 0.0d0
@@ -106,20 +137,14 @@ contains
         var%gauss(j,i)%eq_pstrain_trial = 0.0d0
       enddo
     enddo
-  end subroutine init_mesh
+  end subroutine init_gauss_point
 
   subroutine init_matrix(mesh)
     implicit none
     type(meshdef) :: mesh
 
-    call monolis_get_nonzero_pattern_by_simple_mesh_R(mat, mesh%nnode, 8, ndof, mesh%nelem, mesh%elem)
+    call monolis_get_nonzero_pattern_by_simple_mesh_R(mat, mesh%n_node, mesh%n_base_func, n_dof, mesh%n_elem, mesh%elem)
   end subroutine init_matrix
-
-  subroutine finalize_mesh(mesh, var)
-    implicit none
-    type(meshdef) :: mesh
-    type(vardef) :: var
-  end subroutine finalize_mesh
 
   subroutine get_mises(s, mises)
     implicit none
@@ -137,22 +162,22 @@ contains
     mises  = dsqrt( 3.0d0 * smises )
   end subroutine get_mises
 
-  subroutine get_element_node_id(eid, elem, elemid)
+  subroutine get_element_node_id(eid, n_base_func, elem, elemid)
     implicit none
-    integer(kint) :: i, eid, elem(:,:), elemid(:)
-    do i = 1, 8
+    integer(kint) :: i, n_base_func, eid, elem(:,:), elemid(:)
+    do i = 1, n_base_func
       elemid(i) = elem(i,eid)
     enddo
   end subroutine get_element_node_id
 
-  subroutine get_element_node(elem, node, x)
+  subroutine get_element_node(n_base_func, elem, node, x)
     implicit none
-    integer(kint) :: i, in, j, elem(:)
+    integer(kint) :: i, in, j, elem(:), n_base_func
     real(kdouble) :: node(:,:), x(:,:)
 
-    do i = 1, 8
+    do i = 1, n_base_func
       in = elem(i)
-      do j = 1, ndof
+      do j = 1, n_dof
         x(1,i) = node(1,in)
         x(2,i) = node(2,in)
         x(3,i) = node(3,in)

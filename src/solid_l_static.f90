@@ -1,37 +1,60 @@
-program main
+program monolis_solid_l_static
   use mod_soild_util
   use mod_soild_io
-!  use mod_soild_analysis
   use mod_soild_debug
+  use mod_soild_matrix
+  use mod_soild_update
+  use mod_soild_solver
   implicit none
   type(meshdef) :: mesh
   type(paramdef) :: param
   type(vardef) :: var
-  real(kdouble) :: t1, t2, t3
+  real(kdouble) :: t1, t2, t3, t4, t5, t6, t7
 
-  call monolis_global_initialize()
-  call monolis_initialize(mat)
-  call monolis_com_initialize_by_parted_files(com, monolis_mpi_get_global_comm(), &
-    & MONOLIS_DEFAULT_TOP_DIR, MONOLIS_DEFAULT_PART_DIR, "node.dat")
+  call init_global()
   t1 = monolis_get_time()
 
-  !> FEM part
-  call soild_write_header("Solid FEM")
+  !> initialize part
+  call soild_write_header("monolis_solid linear static")
   call soild_input_param(param)
   call soild_input_mesh(mesh, param)
 
-  t2 = monolis_get_time()
-  call soild_plot_time("input", t2 - t1)
+  !> analysis part
+  t2 = monolis_get_time_global_sync()
+  call soild_plot_time("nonzero detection", t2 - t1)
 
-!  if(is_nl_geom .or. is_nl_mat)then
-!    call solid_nonlinear_static(mesh, param, var)
-!  else
-!    call solid_linear_static(mesh, param, var)
-!  endif
+  !call soild_debug_time(1, 0.0d0)
+  call init_mesh(mesh, var)
+  call init_matrix(mesh)
 
-  t3 = monolis_get_time()
-  call soild_plot_time("total ", t3 - t1)
+  t3 = monolis_get_time_global_sync()
+  call soild_plot_time("nonzero detection", t3 - t2)
 
-  call monolis_finalize(mat)
-  call monolis_global_finalize()
-end program main
+  call get_stiff_matrix(mesh, var, param)
+  call load_condition(var, param)
+  call get_RHS(mesh, var)
+  call bound_condition(mesh, param, var)
+
+  t4 = monolis_get_time_global_sync()
+  call soild_plot_time("matrix generation", t4 - t3)
+
+  call solver(mesh, var)
+
+  t5 = monolis_get_time_global_sync()
+  call soild_plot_time("solver", t5 - t4)
+
+  call delta_u_update(mesh, var)
+  call stress_update(mesh, var, param)
+  call u_update(mesh, var)
+
+  t6 = monolis_get_time_global_sync()
+  call soild_plot_time("stress calculation", t6 - t5)
+
+  call outout_res(mesh, param, var)
+  call finalize_mesh(mesh, var)
+
+  t7 = monolis_get_time_global_sync()
+  call soild_plot_time("output", t7 - t6)
+
+  call finalize_global()
+end program monolis_solid_l_static

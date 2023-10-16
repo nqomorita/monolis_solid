@@ -30,7 +30,7 @@ contains
     type(meshdef) :: mesh
     type(vardef) :: var
     integer(kint) :: i, j
-    do i = 1, mesh%nnode
+    do i = 1, mesh%n_node
       do j = 1, 6
         var%nstrain(j,i) = 0.0d0
         var%nstress(j,i) = 0.0d0
@@ -68,10 +68,10 @@ contains
     call init_nodal_strain_and_stress(mesh, var)
     call get_interpolation_matrix_C3D8(inv)
 
-    allocate(inode(mesh%nnode), source = 0)
+    allocate(inode(mesh%n_node), source = 0)
     var%q = 0.0d0
 
-    do icel = 1, mesh%nelem
+    do icel = 1, mesh%n_elem
       call C3D8_update(mesh, var, param, icel, q)
       call C3D8_get_nodal_values(var, icel, inv, nstrain, nstress, estrain, estress)
 
@@ -94,7 +94,7 @@ contains
     enddo
 
     !> get average of nodal strain and stress
-    do i = 1, mesh%nnode
+    do i = 1, mesh%n_node
       tmp = 1.0d0/dble(inode(i))
       do j = 1, 6
         var%nstrain(j,i) = var%nstrain(j,i) * tmp
@@ -103,12 +103,12 @@ contains
     enddo
 
     !> get nodal Mises stress
-    do i = 1, mesh%nnode
+    do i = 1, mesh%n_node
       call get_mises(var%nstress(1:6,i), var%nmises(i))
     enddo
 
     !> get elemental Mises stress
-    do i = 1, mesh%nelem
+    do i = 1, mesh%n_elem
       call get_mises(var%estress(1:6,i), var%emises(i))
     enddo
   end subroutine stress_update

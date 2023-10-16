@@ -53,6 +53,7 @@ sys/util.f90 \
 io/debug.f90 \
 io/io.f90 \
 sys/solver.f90 \
+material/el.f90 \
 material/elpl.f90 \
 elem/element_C3D8.f90 \
 solid/matrix.f90 \
