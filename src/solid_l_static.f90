@@ -1,8 +1,7 @@
-
 program main
   use mod_soild_util
   use mod_soild_io
-  use mod_soild_analysis
+!  use mod_soild_analysis
   use mod_soild_debug
   implicit none
   type(meshdef) :: mesh
@@ -24,11 +23,11 @@ program main
   t2 = monolis_get_time()
   call soild_plot_time("input", t2 - t1)
 
-  if(is_nl_geom .or. is_nl_mat)then
-    call solid_nonlinear_static(mesh, param, var)
-  else
-    call solid_linear_static(mesh, param, var)
-  endif
+!  if(is_nl_geom .or. is_nl_mat)then
+!    call solid_nonlinear_static(mesh, param, var)
+!  else
+!    call solid_linear_static(mesh, param, var)
+!  endif
 
   t3 = monolis_get_time()
   call soild_plot_time("total ", t3 - t1)
