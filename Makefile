@@ -55,6 +55,7 @@ io/io.f90 \
 sys/solver.f90 \
 material/el.f90 \
 material/elpl.f90 \
+elem/element_C2D4.f90 \
 elem/element_C3D8.f90 \
 solid/matrix.f90 \
 solid/update.f90
