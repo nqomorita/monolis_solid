@@ -1,6 +1,5 @@
 module mod_soild_elpl
   use mod_soild_util
-  use mod_soild_debug
   use mod_soild_el
 
   implicit none

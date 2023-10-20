@@ -1,6 +1,6 @@
 module mod_soild_matrix
   use mod_soild_util
-  use mod_soild_debug
+  use mod_soild_io_log
   use mod_soild_c3d8
 
 contains

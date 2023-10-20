@@ -1,7 +1,7 @@
 program monolis_solid_l_static
   use mod_soild_util
   use mod_soild_io
-  use mod_soild_debug
+  use mod_soild_io_log
   use mod_soild_matrix
   use mod_soild_update
   use mod_soild_solver

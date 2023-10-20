@@ -1,11 +1,9 @@
 module mod_soild_solver
   use mod_soild_util
-  use mod_soild_debug
+  use mod_soild_io_log
 contains
 
   subroutine solver(mesh, var)
-    use mod_monolis
-    use mod_soild_debug
     implicit none
     type(meshdef) :: mesh
     type(vardef) :: var

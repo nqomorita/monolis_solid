@@ -27,8 +27,8 @@ contains
     enddo
 
     do i = 1, 4
-      call monolis_C2D4_integral_point(i, r)
-      call monolis_C2D4_get_global_deriv(x, r, dndx, det)
+      !call monolis_C2D4_integral_point(i, r)
+      !call monolis_C2D4_get_global_deriv(x, r, dndx, det)
       call C2D4_Bmat(dndx, B)
       call C2D4_Dmat(y, p, D)
       call C2D4_Kmat(D, B, wg, det, stiff)
@@ -121,8 +121,8 @@ contains
     enddo
 
     do i = 1, 4
-      call monolis_C2D4_integral_point(i, r)
-      call monolis_C2D4_get_global_deriv(x0, r, dndx, det)
+      !call monolis_C2D4_integral_point(i, r)
+      !call monolis_C2D4_get_global_deriv(x0, r, dndx, det)
       call C2D4_Bmat(dndx, B)
 !      call get_mat(param%mat_id(icel), x0, r, y, p)
       call C2D4_Dmat(y, p, D)
