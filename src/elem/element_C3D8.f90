@@ -1,6 +1,6 @@
-module mod_soild_c3d8
-  use mod_soild_util
-  use mod_soild_elpl
+module mod_solid_c3d8
+  use mod_solid_util
+  use mod_solid_elpl
 
 contains
 
@@ -366,4 +366,4 @@ contains
     estress = estress/8.0d0
   end subroutine C3D8_get_nodal_values
 
-end module mod_soild_c3d8
+end module mod_solid_c3d8

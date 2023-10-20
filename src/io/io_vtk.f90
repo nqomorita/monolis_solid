@@ -1,9 +1,9 @@
-module mod_soild_io_vtk
-  use mod_soild_util
+module mod_solid_io_vtk
+  use mod_solid_util
 
 contains
 
-  subroutine outout_res(mesh, param, var)
+  subroutine solid_outout_res(mesh, param, var)
     implicit none
     type(paramdef) :: param
     type(meshdef) :: mesh
@@ -160,7 +160,7 @@ contains
       write(20,"(a)")'</UnstructuredGrid>'
       write(20,"(a)")'</VTKFile>'
     close(20)
-  end subroutine outout_res
+  end subroutine solid_outout_res
 
   subroutine convert_to_real(mesh, var)
     implicit none
@@ -203,4 +203,4 @@ contains
     enddo
   end subroutine convert_to_real
 
-end module mod_soild_io_vtk
+end module mod_solid_io_vtk

@@ -1,29 +1,29 @@
-module mod_soild_update
-  use mod_soild_util
-  use mod_soild_io_log
-  use mod_soild_c3d8
+module mod_solid_update
+  use mod_solid_util
+  use mod_solid_io_log
+  use mod_solid_c3d8
 
 contains
 
-  subroutine delta_u_update(mesh, var)
+  subroutine solid_delta_u_update(mesh, var)
     implicit none
     type(meshdef) :: mesh
     type(vardef) :: var
     integer(kint) :: i
 
-    call soild_debug_header("delta_u_update")
+    call solid_debug_header("delta_u_update")
     var%du = var%du + var%X
-  end subroutine delta_u_update
+  end subroutine solid_delta_u_update
 
-  subroutine u_update(mesh, var)
+  subroutine solid_u_update(mesh, var)
     implicit none
     type(meshdef) :: mesh
     type(vardef) :: var
     integer(kint) :: i
 
-    call soild_debug_header("u_update")
+    call solid_debug_header("u_update")
     var%u = var%u + var%du
-  end subroutine u_update
+  end subroutine solid_u_update
 
   subroutine init_nodal_strain_and_stress(mesh, var)
     implicit none
@@ -50,8 +50,8 @@ contains
     call monolis_get_inverse_matrix_R(8, func, inv)
   end subroutine get_interpolation_matrix_C3D8
 
-  subroutine stress_update(mesh, var, param)
-    use mod_soild_matrix
+  subroutine solid_stress_update(mesh, var, param)
+    use mod_solid_matrix
     implicit none
     type(meshdef) :: mesh
     type(vardef) :: var
@@ -63,7 +63,7 @@ contains
     real(kdouble) :: q(24), r(3)
     integer(kint), allocatable :: inode(:)
 
-    call soild_debug_header("stress_update")
+    call solid_debug_header("stress_update")
 
     call init_nodal_strain_and_stress(mesh, var)
     call get_interpolation_matrix_C3D8(inv)
@@ -111,6 +111,6 @@ contains
     do i = 1, mesh%n_elem
       call get_mises(var%estress(1:6,i), var%emises(i))
     enddo
-  end subroutine stress_update
+  end subroutine solid_stress_update
 
-end module mod_soild_update
+end module mod_solid_update

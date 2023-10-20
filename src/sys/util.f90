@@ -1,4 +1,4 @@
-module mod_soild_util
+module mod_solid_util
   use mod_monolis
 
   integer(kint), parameter :: n_dof = 3
@@ -23,6 +23,9 @@ module mod_soild_util
   end type meshdef
 
   type paramdef
+    !> material
+    type(matdef), allocatable :: mat(:)
+
     !> for time step loop
     integer(kint) :: cur_time_step
 
@@ -77,27 +80,27 @@ module mod_soild_util
 
 contains
 
-  subroutine init_global()
+  subroutine solid_init_global()
     implicit none
     call monolis_global_initialize()
     call monolis_initialize(mat)
     call monolis_com_initialize_by_parted_files(com, monolis_mpi_get_global_comm(), &
       & MONOLIS_DEFAULT_TOP_DIR, MONOLIS_DEFAULT_PART_DIR, "node.dat")
-  end subroutine init_global
+  end subroutine solid_init_global
 
-  subroutine finalize_global()
+  subroutine solid_finalize_global()
     implicit none
     call monolis_finalize(mat)
     call monolis_com_finalize(com)
     call monolis_global_finalize()
-  end subroutine finalize_global
+  end subroutine solid_finalize_global
 
-  subroutine init_mesh(mesh, var)
+  subroutine solid_init_mesh(mesh, var)
     implicit none
     type(meshdef) :: mesh
     type(vardef) :: var
 
-    call init_gauss_point(mesh, var, 8)
+    call solid_init_gauss_point(mesh, var, 8)
 
     allocate(var%nstrain(6, mesh%n_node), source = 0.0d0)
     allocate(var%nstress(6, mesh%n_node), source = 0.0d0)
@@ -113,15 +116,15 @@ contains
     allocate(var%f_reaction (3*mesh%n_node), source = 0.0d0)
     allocate(var%x (3*mesh%n_node), source = 0.0d0)
     allocate(var%b (3*mesh%n_node), source = 0.0d0)
-  end subroutine init_mesh
+  end subroutine solid_init_mesh
 
-  subroutine finalize_mesh(mesh, var)
+  subroutine solid_finalize_mesh(mesh, var)
     implicit none
     type(meshdef) :: mesh
     type(vardef) :: var
-  end subroutine finalize_mesh
+  end subroutine solid_finalize_mesh
 
-  subroutine init_gauss_point(mesh, var, n_gauss_point)
+  subroutine solid_init_gauss_point(mesh, var, n_gauss_point)
     implicit none
     type(meshdef) :: mesh
     type(vardef) :: var
@@ -139,14 +142,21 @@ contains
         var%gauss(j,i)%eq_pstrain_trial = 0.0d0
       enddo
     enddo
-  end subroutine init_gauss_point
+  end subroutine solid_init_gauss_point
 
-  subroutine init_matrix(mesh)
+  subroutine solid_init_param(param, n_material)
+    implicit none
+    type(paramdef) :: param
+    integer(kint) :: n_material
+    allocate(param%mat(1))
+  end subroutine solid_init_param
+
+  subroutine solid_init_matrix(mesh)
     implicit none
     type(meshdef) :: mesh
 
     call monolis_get_nonzero_pattern_by_simple_mesh_R(mat, mesh%n_node, mesh%n_base_func, n_dof, mesh%n_elem, mesh%elem)
-  end subroutine init_matrix
+  end subroutine solid_init_matrix
 
   subroutine get_mises(s, mises)
     implicit none
@@ -186,4 +196,4 @@ contains
       enddo
     enddo
   end subroutine get_element_node
-end module mod_soild_util
+end module mod_solid_util

@@ -1,38 +1,22 @@
-module mod_soild_io_monolis
-  use mod_soild_util
-  use mod_soild_io_log
+module mod_solid_io_monolis
+  use mod_solid_util
+  use mod_solid_io_log
 
 contains
 
-  subroutine soild_input_param(param)
+  subroutine solid_input_param(param)
     implicit none
     type(paramdef) :: param
     integer(kint) :: i, n
 
-!    open(10, file="input.dat", status='old')
-!      read(10,*) i
-!      if(i == 1) is_nl_geom = .true.
-!      read(10,*) i
-!      if(i == 1) is_nl_mat = .true.
-!      read(10,*) param%max_nr_step
-!      read(10,*) param%E
-!      read(10,*) param%mu
-!      read(10,*) param%rho
-!    close(10)
-!
-!    if(.not. is_nl_mat) return
-!
-!    open(10, file="input_elpl.dat", status='old')
-!      read(10,*) n
-!      allocate(param%strain_table(n), source = 0.0d0)
-!      allocate(param%stress_table(n), source = 0.0d0)
-!      do i = 1, n
-!        read(10,*) param%strain_table(i), param%stress_table(i)
-!      enddo
-!    close(10)
-  end subroutine soild_input_param
+    open(10, file="input.dat", status='old')
+      read(10,*) param%mat(1)%E
+      read(10,*) param%mat(1)%mu
+      read(10,*) param%mat(1)%rho
+    close(10)
+  end subroutine solid_input_param
 
-  subroutine soild_input_mesh(mesh, param)
+  subroutine solid_input_mesh(mesh, param)
     implicit none
     type(meshdef) :: mesh
     type(paramdef) :: param
@@ -51,6 +35,6 @@ contains
 
     fname = monolis_get_global_input_file_name(MONOLIS_DEFAULT_TOP_DIR, MONOLIS_DEFAULT_PART_DIR, "load.dat")
     call monolis_input_bc_R(fname, param%ncload, ndof, param%icload, param%cload)
-  end subroutine soild_input_mesh
+  end subroutine solid_input_mesh
 
-end module mod_soild_io_monolis
+end module mod_solid_io_monolis

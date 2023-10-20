@@ -1,5 +1,5 @@
-module mod_soild_el
-  use mod_soild_util
+module mod_solid_el
+  use mod_solid_util
 
   implicit none
 
@@ -26,4 +26,4 @@ contains
     D(6,6) = 0.5d0*g*(1.0d0-2.0d0*mu)
   end subroutine Dmat_elastic
 
-end module mod_soild_el
+end module mod_solid_el

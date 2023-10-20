@@ -1,14 +1,14 @@
-module mod_soild_solver
-  use mod_soild_util
-  use mod_soild_io_log
+module mod_solid_solver
+  use mod_solid_util
+  use mod_solid_io_log
 contains
 
-  subroutine solver(mesh, var)
+  subroutine solid_solver(mesh, var)
     implicit none
     type(meshdef) :: mesh
     type(vardef) :: var
 
-    call soild_debug_header("solver")
+    call solid_debug_header("solver")
 
     call monolis_set_method(mat, monolis_iter_CG)
     call monolis_set_precond(mat, monolis_prec_DIAG)
@@ -19,7 +19,7 @@ contains
     call monolis_show_summary(mat, .true.)
 
     call monolis_solve_R(mat, com, var%B, var%X)
-  end subroutine solver
+  end subroutine solid_solver
 
   function is_convergence(mesh, var, step)
     implicit none
@@ -50,4 +50,4 @@ contains
     endif
   end function is_convergence
 
-end module mod_soild_solver
+end module mod_solid_solver

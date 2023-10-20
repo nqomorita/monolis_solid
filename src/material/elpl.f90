@@ -1,6 +1,6 @@
-module mod_soild_elpl
-  use mod_soild_util
-  use mod_soild_el
+module mod_solid_elpl
+  use mod_solid_util
+  use mod_solid_el
 
   implicit none
 
@@ -158,4 +158,4 @@ contains
 !    type(paramdef) :: param
 !    type(vardef) :: var
 !  end subroutine elast_plastic_update
-end module mod_soild_elpl
+end module mod_solid_elpl

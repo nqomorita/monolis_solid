@@ -1,6 +1,6 @@
-module mod_soild_c2d4
-  use mod_soild_util
-  use mod_soild_elpl
+module mod_solid_c2d4
+  use mod_solid_util
+  use mod_solid_elpl
 
 contains
 
@@ -178,4 +178,4 @@ contains
     estress = estress/4.0d0
   end subroutine C2D4_get_nodal_values
 
-end module mod_soild_c2d4
+end module mod_solid_c2d4
