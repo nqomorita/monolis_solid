@@ -2,7 +2,8 @@
 
 ##> compiler setting
 FC     = mpif90 -Wl,-ld_classic
-FFLAGS = -fPIC -O2 -mtune=native -march=native -std=legacy -Wno-missing-include-dirs
+FFLAGS = -fPIC -O2 -Wl,-ld_classic -std=legacy -fbounds-check -fbacktrace -Wuninitialized -ffpe-trap=invalid,zero,overflow
+#FFLAGS = -fPIC -O2 -mtune=native -march=native -std=legacy -Wno-missing-include-dirs
 CC     = mpicc -std=c99
 CFLAGS = -fPIC -O2
 
@@ -51,6 +52,8 @@ TARGET4  = $(addprefix $(BIN_DIR)/, $(BIN4))
 SRC_LIST = \
 sys/util.f90 \
 io/io_log.f90 \
+io/io_vtk.f90 \
+io/io_monolis.f90 \
 io/io.f90 \
 sys/solver.f90 \
 material/el.f90 \

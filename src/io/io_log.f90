@@ -2,7 +2,7 @@ module mod_soild_io_log
   use mod_soild_util
 
   private
-  public :: soild_debug_set_myrank
+  public :: soild_set_debug_write
   public :: soild_write_header
   public :: soild_debug_header
   public :: soild_debug_int
@@ -14,12 +14,18 @@ module mod_soild_io_log
   public :: soild_plot_solver
 
   integer(kint), parameter :: flag = 30
-  character, parameter :: prefix = "** [MONOLIS SOLID] "
+  character, parameter :: prefix*16 = "[MONOLIS SOLID] "
   logical, save :: is_debug = .false.
 
 contains
 
   !# plot section
+  subroutine soild_set_debug_write(flag)
+    implicit none
+    logical :: flag
+    is_debug = flag
+  end subroutine soild_set_debug_write
+
   subroutine soild_write_header(header)
     implicit none
     character(*) :: header

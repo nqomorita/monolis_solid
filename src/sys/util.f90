@@ -97,6 +97,8 @@ contains
     type(meshdef) :: mesh
     type(vardef) :: var
 
+    call init_gauss_point(mesh, var, 8)
+
     allocate(var%nstrain(6, mesh%n_node), source = 0.0d0)
     allocate(var%nstress(6, mesh%n_node), source = 0.0d0)
     allocate(var%nmises (mesh%n_node), source = 0.0d0)
