@@ -25,7 +25,6 @@ program monolis_solid_l_static
   t2 = monolis_get_time_global_sync()
   call solid_plot_time("input files", t2 - t1)
 
-  !call solid_debug_time(1, 0.0d0)
   call solid_init_mesh(mesh, var)
   call solid_init_matrix(mesh)
 
@@ -53,10 +52,11 @@ program monolis_solid_l_static
   call solid_plot_time("stress calculation", t6 - t5)
 
   call solid_outout_res(mesh, param, var)
-  call solid_finalize_mesh(mesh, var)
 
   t7 = monolis_get_time_global_sync()
   call solid_plot_time("output", t7 - t6)
 
+  !> finalize part
+  call solid_finalize_mesh(mesh, var)
   call solid_finalize_global()
 end program monolis_solid_l_static
