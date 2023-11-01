@@ -26,10 +26,15 @@ module mod_solid_util
     !> material
     type(matdef), allocatable :: mat(:)
 
-    !> for time step loop and Newmark-beta
+    !> for time step loop
+    integer(kint) :: n_time_step
     integer(kint) :: cur_time_step
     real(kdouble) :: dt
-    real(kdouble) :: a1, a2, a3, b1, b2, b3
+
+    !> for Newmark-beta
+    real(kdouble) :: gamma, beta
+    real(kdouble) :: Rm, Rk
+    real(kdouble) :: a1, a2, a3, b1, b2, b3, c1, c2
 
     !> for NR loop
     integer(kint) :: cur_nr_step
@@ -44,6 +49,9 @@ module mod_solid_util
     integer(kint) :: ncload
     integer(kint), allocatable :: icload(:,:)
     real(kdouble), allocatable :: cload(:)
+
+    !> for time history
+    real(kdouble), allocatable :: amplitude(:)
   end type paramdef
 
   type matdef
@@ -123,6 +131,8 @@ contains
     allocate(var%estress(6, mesh%n_elem), source = 0.0d0)
     allocate(var%emises (mesh%n_elem), source = 0.0d0)
 
+    allocate(var%a (3*mesh%n_node), source = 0.0d0)
+    allocate(var%v (3*mesh%n_node), source = 0.0d0)
     allocate(var%u (3*mesh%n_node), source = 0.0d0)
     allocate(var%du(3*mesh%n_node), source = 0.0d0)
     allocate(var%q (3*mesh%n_node), source = 0.0d0)

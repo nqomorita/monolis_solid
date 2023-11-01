@@ -5,6 +5,7 @@ program monolis_solid_l_static
   use mod_solid_update
   use mod_solid_solver
   implicit none
+  integer(kint), parameter :: n_material = 1
   type(meshdef) :: mesh
   type(paramdef) :: param
   type(vardef) :: var
@@ -17,7 +18,7 @@ program monolis_solid_l_static
 
   !> initialize part
   call solid_write_header("linear static")
-  call solid_init_param(param, 1)
+  call solid_init_param(param, n_material)
   call solid_input_param(param)
   call solid_input_mesh(mesh, param)
 
