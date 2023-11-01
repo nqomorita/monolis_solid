@@ -30,7 +30,7 @@ contains
       !call monolis_C2D4_integral_point(i, r)
       !call monolis_C2D4_get_global_deriv(x, r, dndx, det)
       call C2D4_Bmat(dndx, B)
-      call C2D4_Dmat(y, p, D)
+      call Dmat_elastic_2D(y, p, D)
       call C2D4_Kmat(D, B, wg, det, stiff)
     enddo
   end subroutine C2D4_stiff
@@ -50,25 +50,6 @@ contains
       B(3,i2) = dndx(i,1)
     enddo
   end subroutine C2D4_Bmat
-
-  subroutine C2D4_Dmat(E, mu, D)
-    implicit none
-    real(kdouble) :: D(3,3), E, mu, g
-
-    D = 0.0d0
-    D(1,1) = E / (1.0d0 + mu) / (1.0d0 - 2.0d0*mu)*(1.0d0 - mu)
-    D(1,2) = E / (1.0d0 + mu) * mu / (1.0d0 - 2.0d0*mu)
-    D(2,1) = E / (1.0d0 + mu) * mu / (1.0d0 - 2.0d0*mu)
-    D(2,2) = E / (1.0d0 + mu) / (1.0d0 - 2.0d0*mu)*(1.0d0 - mu)
-    D(3,3) = 1.0d0 / 2.0d0 * E / (1.0d0 + mu)
-
-    !g = E / (1.0d0-mu*mu)
-    !D(1,1) = g
-    !D(1,2) = g*mu
-    !D(2,2) = g
-    !D(2,1) = g*mu
-    !D(3,3) = g*0.5d0*(1.0d0 - mu)
-  end subroutine C2D4_Dmat
 
   subroutine C2D4_Kmat(D, B, wg, det, stiff)
     implicit none
@@ -125,7 +106,7 @@ contains
       !call monolis_C2D4_get_global_deriv(x0, r, dndx, det)
       call C2D4_Bmat(dndx, B)
 !      call get_mat(param%mat_id(icel), x0, r, y, p)
-      call C2D4_Dmat(y, p, D)
+      call Dmat_elastic_2D(y, p, D)
       call C2D4_get_starian(u, dndx, strain)
 
       stress = matmul(D, strain)

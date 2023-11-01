@@ -214,7 +214,7 @@ contains
     if(is_nl_mat)then
 !      call Dmat_elast_plastic(param, gauss, D)
     else
-      call Dmat_elastic(param%mat(1)%E, param%mat(1)%mu, D)
+      call Dmat_elastic_3D(param%mat(1)%E, param%mat(1)%mu, D)
     endif
   end subroutine C3D8_Dmat
 
