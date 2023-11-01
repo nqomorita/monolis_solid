@@ -8,6 +8,7 @@ program monolis_solid_l_dynamic
   type(meshdef) :: mesh
   type(paramdef) :: param
   type(vardef) :: var
+  integer(kint) :: time_step
   real(kdouble) :: t1, t2, t3, t4, t5, t6, t7
 
   call solid_set_debug_write(.true.)
@@ -31,30 +32,35 @@ program monolis_solid_l_dynamic
   t3 = monolis_get_time_global_sync()
   call solid_plot_time("nonzero-pattern detection", t3 - t2)
 
-  call solid_get_stiff_matrix(mesh, var, param)
-  call solid_load_condition(var, param)
-  call solid_get_RHS(mesh, var)
-  call solid_bound_condition(mesh, param, var)
 
-  t4 = monolis_get_time_global_sync()
-  call solid_plot_time("matrix generation", t4 - t3)
+  do time_step = 1, param%n_step
+    t3 = monolis_get_time_global_sync()
 
-  call solid_solver(mesh, var)
+    !call solid_get_stiff_matrix(mesh, var, param)
+    call solid_load_condition(var, param)
+    call solid_get_RHS(mesh, var)
+    call solid_bound_condition(mesh, param, var)
 
-  t5 = monolis_get_time_global_sync()
-  call solid_plot_time("solver", t5 - t4)
+    t4 = monolis_get_time_global_sync()
+    call solid_plot_time("matrix generation", t4 - t3)
 
-  call solid_delta_u_update(mesh, var)
-  call solid_stress_update(mesh, var, param)
-  call solid_u_update(mesh, var)
+    call solid_solver(mesh, var)
 
-  t6 = monolis_get_time_global_sync()
-  call solid_plot_time("stress calculation", t6 - t5)
+    t5 = monolis_get_time_global_sync()
+    call solid_plot_time("solver", t5 - t4)
 
-  call solid_outout_res(mesh, param, var)
+    call solid_delta_u_update(mesh, var)
+    call solid_stress_update(mesh, var, param)
+    call solid_Newmark_update(mesh, var)
 
-  t7 = monolis_get_time_global_sync()
-  call solid_plot_time("output", t7 - t6)
+    t6 = monolis_get_time_global_sync()
+    call solid_plot_time("stress calculation", t6 - t5)
+
+    call solid_outout_res(mesh, param, var)
+
+    t7 = monolis_get_time_global_sync()
+    call solid_plot_time("output", t7 - t6)
+  enddo
 
   !> finalize part
   call solid_finalize_mesh(mesh, var)

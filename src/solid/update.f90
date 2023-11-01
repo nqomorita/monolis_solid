@@ -25,6 +25,32 @@ contains
     var%u = var%u + var%du
   end subroutine solid_u_update
 
+  subroutine solid_Newmark_update(mesh, var, param)
+    implicit none
+    type(meshdef) :: mesh
+    type(vardef) :: var
+    type(paramdef) :: param
+    integer(kint) :: i
+    real(kdouble) :: a1, a2, a3, b1, b2, b3, at, vt, kt, dt
+
+    a1 = param%a1
+    a2 = param%a2
+    a3 = param%a3
+    b1 = param%b1
+    b2 = param%b2
+    b3 = param%b3
+    dt = param%dt
+
+    do i = 1, 3*mesh%n_node
+      at = var%a(i)
+      vt = var%v(i)
+
+      var%a(i) = - a1*at - a2*vt + a3*var%du(i)
+      var%v(i) = - b1*at - b2*vt + b3*var%du(i)
+      var%u(i) = var%u(i) + var%du(i)
+    enddo
+  end subroutine solid_Newmark_update
+
   subroutine init_nodal_strain_and_stress(mesh, var)
     implicit none
     type(meshdef) :: mesh
@@ -37,18 +63,6 @@ contains
       enddo
     enddo
   end subroutine init_nodal_strain_and_stress
-
-  subroutine get_interpolation_matrix_C3D8(inv)
-    implicit none
-    integer(kint) :: i
-    real(kdouble) :: func(8,8), inv(8,8), r(3)
-
-    do i = 1, 8
-      call monolis_C3D8_integral_point(i, r)
-      call monolis_C3D8_shapefunc(r, func(i,:))
-    enddo
-    call monolis_get_inverse_matrix_R(8, func, inv)
-  end subroutine get_interpolation_matrix_C3D8
 
   subroutine solid_stress_update(mesh, var, param)
     use mod_solid_matrix

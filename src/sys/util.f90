@@ -26,12 +26,15 @@ module mod_solid_util
     !> material
     type(matdef), allocatable :: mat(:)
 
-    !> for time step loop
+    !> for time step loop and Newmark-beta
     integer(kint) :: cur_time_step
+    real(kdouble) :: dt
+    real(kdouble) :: a1, a2, a3, b1, b2, b3
 
     !> for NR loop
     integer(kint) :: cur_nr_step
     integer(kint) :: max_nr_step
+    integer(kint) :: ths_nr_step
 
     !> for boundary condition
     integer(kint) :: nbound
@@ -54,13 +57,24 @@ module mod_solid_util
 
   type vardef
     !> for analysis
-    real(kdouble), allocatable :: x(:)  !> solution vector of Ax = b
-    real(kdouble), allocatable :: b(:)  !> solution vector of Ax = b
-    real(kdouble), allocatable :: u(:)  !> displacement
-    real(kdouble), allocatable :: du(:) !> delta displacement
-    real(kdouble), allocatable :: q(:)  !> internal force
-    real(kdouble), allocatable :: f(:)  !> external force
-    real(kdouble), allocatable :: f_reaction(:) !> reaction force
+    !> solution vector of Ax = b
+    real(kdouble), allocatable :: x(:)
+    !> RHS vector of Ax = b
+    real(kdouble), allocatable :: b(:)
+    !> accleteration
+    real(kdouble), allocatable :: a(:)
+    !> velocity
+    real(kdouble), allocatable :: v(:)
+    !> displacement
+    real(kdouble), allocatable :: u(:)
+    !> delta displacement
+    real(kdouble), allocatable :: du(:)
+    !> internal force
+    real(kdouble), allocatable :: q(:)
+    !> external force
+    real(kdouble), allocatable :: f(:)
+    !> reaction force
+    real(kdouble), allocatable :: f_reaction(:)
 
     !> for results
     type(gaussdef), allocatable :: gauss(:,:)

@@ -366,4 +366,15 @@ contains
     estress = estress/8.0d0
   end subroutine C3D8_get_nodal_values
 
+  subroutine get_interpolation_matrix_C3D8(inv)
+    implicit none
+    integer(kint) :: i
+    real(kdouble) :: func(8,8), inv(8,8), r(3)
+
+    do i = 1, 8
+      call monolis_C3D8_integral_point(i, r)
+      call monolis_C3D8_shapefunc(r, func(i,:))
+    enddo
+    call monolis_get_inverse_matrix_R(8, func, inv)
+  end subroutine get_interpolation_matrix_C3D8
 end module mod_solid_c3d8
