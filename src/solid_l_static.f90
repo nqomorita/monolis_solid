@@ -9,6 +9,8 @@ program monolis_solid_l_static
   type(meshdef) :: mesh
   type(paramdef) :: param
   type(vardef) :: var
+  type(monolis_structure) :: mat
+  type(monolis_com) :: com
   real(kdouble) :: t1, t2, t3, t4, t5, t6, t7
 
   call solid_set_debug_write(.true.)

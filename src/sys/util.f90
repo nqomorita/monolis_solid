@@ -97,9 +97,6 @@ module mod_solid_util
     real(kdouble), allocatable :: emises(:)
   end type vardef
 
-  type(monolis_structure) :: mat
-  type(monolis_com) :: com
-
 contains
 
   subroutine solid_init_global()

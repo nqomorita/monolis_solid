@@ -9,6 +9,8 @@ program monolis_solid_l_dynamic
   type(meshdef) :: mesh
   type(paramdef) :: param
   type(vardef) :: var
+  type(monolis_structure) :: mat
+  type(monolis_com) :: com
   integer(kint) :: time_step
   real(kdouble) :: t1, t2, t3, t4, t5, t6, t7
 
@@ -109,15 +111,22 @@ contains
     type(monolis_structure) :: Kmat, Mmat
     real(kdouble), allocatable :: x1(:), x2(:)
 
-    !call monolis_copy_mat_profile(mat, Kmat)
-    !call monolis_copy_mat_profile(mat, Mmat)
+    !call monolis_copy_mat_nonzero_pattern_R(mat, Kmat)
+    !call monolis_copy_mat_nonzero_pattern_R(mat, Mmat)
 
     !call get_stiff_matrix(mesh, var, param, Kmat)
     !call get_mass_matrix(mesh, var, param, Mmat)
 
-    !call get_matrix_for_dynamic_analysis(param%c2, Mmat, param%c1, Kmat, mat)!
+    call get_matrix_for_dynamic_analysis(param%c2, Mmat, param%c1, Kmat, mat)
+
+    call monolis_alloc_R_1d(x1(n_dof*mesh%n_node))
+    call monolis_alloc_R_1d(x2(n_dof*mesh%n_node))
+
     call get_RHS_temp_vector(mesh, var, param%a1, param%a2, param%a3, param%b1, param%b2, param%b3, x1, x2)
     call get_RHS_for_dynamic_analysis(mesh, var, Mmat, Kmat, param%Rm, param%Rk, x1, x2)
+
+    call monolis_dealloc_R_1d(x1)
+    call monolis_dealloc_R_1d(x2)
 
     !deallocate(Kmat%MAT%A)
     !deallocate(Kmat%MAT%X)
@@ -133,9 +142,9 @@ contains
     real(kdouble) :: c1, c2
     integer(kint) :: i
 
-    !do i = 1, size(mat%MAT%A)
-    !  mat%MAT%A(i) = c2*Mmat%MAT%A(i) + c1*Kmat%MAT%A(i)
-    !enddo
+    do i = 1, size(Mmat%MAT%A)
+      mat%MAT%A(i) = c2*Mmat%MAT%A(i) + c1*Kmat%MAT%A(i)
+    enddo
   end subroutine get_matrix_for_dynamic_analysis
 
   subroutine get_RHS_temp_vector(mesh, var, a1, a2, a3, b1, b2, b3, x1, x2)
@@ -144,15 +153,12 @@ contains
     type(vardef) :: var
     integer(kint) :: i
     real(kdouble) :: a1, a2, a3, b1, b2, b3
-    real(kdouble), allocatable :: x1(:), x2(:)
+    real(kdouble) :: x1(:), x2(:)
 
-    allocate(x1(3*mesh%n_node), source = 0.0d0)
-    allocate(x2(3*mesh%n_node), source = 0.0d0)
-
-    !do i = 1, 3*mesh%n_node
-    !  x1(i) = - a3*var%du(i) + a2*var%v(i) + a1*var%a(i)
-    !  x2(i) = - b3*var%du(i) + b2*var%v(i) + b1*var%a(i)
-    !enddo
+    do i = 1, n_dof*mesh%n_node
+      x1(i) = - a3*var%du(i) + a2*var%v(i) + a1*var%a(i)
+      x2(i) = - b3*var%du(i) + b2*var%v(i) + b1*var%a(i)
+    enddo
   end subroutine get_RHS_temp_vector
 
   subroutine get_RHS_for_dynamic_analysis(mesh, var, Mmat, Kmat, Rm, Rk, x1, x2)
@@ -163,29 +169,27 @@ contains
     type(monolis_structure) :: Kmat, Mmat
     integer(kint) :: i, j, in
     real(kdouble) :: Rm, Rk
-    real(kdouble), allocatable :: x1(:), x2(:)
+    real(kdouble) :: x1(:), x2(:)
     real(kdouble), allocatable :: y1(:), y2(:), y3(:)
 
-    !allocate(y1(3*mesh%n_node), source = 0.0d0)
-    !allocate(y2(3*mesh%n_node), source = 0.0d0)
-    !allocate(y3(3*mesh%n_node), source = 0.0d0)
+    call monolis_alloc_R_1d(y1, n_dof*mesh%n_node)
+    call monolis_alloc_R_1d(y2, n_dof*mesh%n_node)
+    call monolis_alloc_R_1d(y3, n_dof*mesh%n_node)
 
-    !do i = 1, 3*mesh%n_node
-    !  y1(i) = x1(i) + Rm*x2(i)
-    !enddo
+    do i = 1, n_dof*mesh%n_node
+      y1(i) = x1(i) + Rm*x2(i)
+    enddo
 
-    !call monolis_matvec_product(Mmat, y1, y3)
-    !call monolis_matvec_product(Kmat, x2, y2)
+    call monolis_matvec_product_main_R(com, Mmat, y1, y3, t1, t2)
+    call monolis_matvec_product_main_R(com, Kmat, x2, y2, t1, t2)
 
-    !do i = 1, 3*mesh%n_node
-    !  var%g(i) = y3(i) + Rk*y2(i)
-    !enddo
+    do i = 1, n_dof*mesh%n_node
+      var%g(i) = y3(i) + Rk*y2(i)
+    enddo
 
-    !deallocate(x1)
-    !deallocate(x2)
-    !deallocate(y1)
-    !deallocate(y2)
-    !deallocate(y3)
+    call monolis_dealloc_R_1d(y1)
+    call monolis_dealloc_R_1d(y2)
+    call monolis_dealloc_R_1d(y3)
   end subroutine get_RHS_for_dynamic_analysis
 
 end program monolis_solid_l_dynamic

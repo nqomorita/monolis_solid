@@ -74,10 +74,14 @@ OBJS3     = $(subst $(SRC_DIR), $(OBJ_DIR), $(SOURCES3:.f90=.o))
 OBJS4     = $(subst $(SRC_DIR), $(OBJ_DIR), $(SOURCES4:.f90=.o))
 
 all: \
-	$(TARGET1)
+	$(TARGET1) \
+	$(TARGET3)
 
 $(TARGET1): $(OBJS1)
 	$(FC) -o $@ $(OBJS1) $(LIBS)
+
+$(TARGET3): $(OBJS3)
+	$(FC) -o $@ $(OBJS3) $(LIBS)
 
 $(OBJ_DIR)/%.o: $(SRC_DIR)/%.f90
 	$(FC) $(FFLAGS) $(INCLUDE) $(MOD_DIR) -o $@ -c $<
