@@ -99,18 +99,24 @@ module mod_solid_util
 
 contains
 
-  subroutine solid_init_global()
+  subroutine solid_init_global(monomat, monocom)
     implicit none
+    type(monolis_structure) :: monomat
+    type(monolis_com) :: monocom
+
     call monolis_global_initialize()
-    call monolis_initialize(mat)
-    call monolis_com_initialize_by_parted_files(com, monolis_mpi_get_global_comm(), &
+    call monolis_initialize(monomat)
+    call monolis_com_initialize_by_parted_files(monocom, monolis_mpi_get_global_comm(), &
       & MONOLIS_DEFAULT_TOP_DIR, MONOLIS_DEFAULT_PART_DIR, "node.dat")
   end subroutine solid_init_global
 
-  subroutine solid_finalize_global()
+  subroutine solid_finalize_global(monomat, monocom)
     implicit none
-    call monolis_finalize(mat)
-    call monolis_com_finalize(com)
+    type(monolis_structure) :: monomat
+    type(monolis_com) :: monocom
+
+    call monolis_finalize(monomat)
+    call monolis_com_finalize(monocom)
     call monolis_global_finalize()
   end subroutine solid_finalize_global
 
@@ -172,11 +178,12 @@ contains
     allocate(param%mat(1))
   end subroutine solid_init_param
 
-  subroutine solid_init_matrix(mesh)
+  subroutine solid_init_matrix(mesh, monomat)
     implicit none
     type(meshdef) :: mesh
+    type(monolis_structure) :: monomat
 
-    call monolis_get_nonzero_pattern_by_simple_mesh_R(mat, mesh%n_node, mesh%n_base_func, n_dof, mesh%n_elem, mesh%elem)
+    call monolis_get_nonzero_pattern_by_simple_mesh_R(monomat, mesh%n_node, mesh%n_base_func, n_dof, mesh%n_elem, mesh%elem)
   end subroutine solid_init_matrix
 
   subroutine get_mises(s, mises)

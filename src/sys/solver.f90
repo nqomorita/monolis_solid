@@ -3,28 +3,32 @@ module mod_solid_solver
   use mod_solid_io_log
 contains
 
-  subroutine solid_solver(mesh, var)
+  subroutine solid_solver(mesh, var, monomat, monocom)
     implicit none
     type(meshdef) :: mesh
     type(vardef) :: var
+    type(monolis_structure) :: monomat
+    type(monolis_com) :: monocom
 
     call solid_debug_header("solver")
 
-    call monolis_set_method(mat, monolis_iter_CG)
-    call monolis_set_precond(mat, monolis_prec_DIAG)
-    call monolis_set_maxiter(mat, 100000)
-    call monolis_set_tolerance(mat, 1.0d-8)
-    call monolis_show_timelog(mat, .true.)
-    call monolis_show_iterlog(mat, .true.)
-    call monolis_show_summary(mat, .true.)
+    call monolis_set_method (monomat, monolis_iter_CG)
+    call monolis_set_precond(monomat, monolis_prec_DIAG)
+    call monolis_set_maxiter(monomat, 100000)
+    call monolis_set_tolerance(monomat, 1.0d-8)
+    call monolis_show_timelog (monomat, .true.)
+    call monolis_show_iterlog (monomat, .true.)
+    call monolis_show_summary (monomat, .true.)
 
-    call monolis_solve_R(mat, com, var%B, var%X)
+    call monolis_solve_R(monomat, monocom, var%B, var%X)
   end subroutine solid_solver
 
-  function is_convergence(mesh, var, step)
+  function is_convergence(mesh, var, monomat, monocom, step)
     implicit none
     type(meshdef) :: mesh
     type(vardef) :: var
+    type(monolis_structure) :: monomat
+    type(monolis_com) :: monocom
     integer(kint) :: step
     real(kdouble), save :: b0nrm
     real(kdouble) :: bnrm, rnrm, rnrmmax, qnrm
@@ -34,8 +38,8 @@ contains
 
     bnrm = 0.0d0
     rnrm = 0.0d0
-    call monolis_inner_product_R(mat, com, n_dof, var%q, var%q, qnrm)
-    call monolis_inner_product_R(mat, com, n_dof, var%B, var%B, bnrm)
+    call monolis_inner_product_R(monomat, monocom, n_dof, var%q, var%q, qnrm)
+    call monolis_inner_product_R(monomat, monocom, n_dof, var%B, var%B, bnrm)
     bnrm = bnrm
 
     if(step == 1)then

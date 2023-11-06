@@ -5,22 +5,23 @@ module mod_solid_matrix
 
 contains
 
-  subroutine solid_get_stiff_matrix(mesh, var, param)
+  subroutine solid_get_stiff_matrix(mesh, var, param, monomat)
     implicit none
     type(meshdef) :: mesh
     type(vardef) :: var
     type(paramdef) :: param
+    type(monolis_structure) :: monomat
     integer(kint) :: i, icel
     integer(kint) :: elem(8)
     real(kdouble) :: stiff(24,24), x(3,8)
 
     call solid_debug_header("get_stiff_matrix")
-    call monolis_clear_mat_value_R(mat)
+    call monolis_clear_mat_value_R(monomat)
 
     do icel = 1, mesh%n_elem
       call get_element_node_id(icel, mesh%n_base_func, mesh%elem, elem)
       call C3D8_stiff(mesh, var, param, icel, stiff)
-      call monolis_add_matrix_to_sparse_matrix_R(mat, 8, elem, stiff)
+      call monolis_add_matrix_to_sparse_matrix_R(monomat, 8, elem, stiff)
     enddo
   end subroutine solid_get_stiff_matrix
 
@@ -53,11 +54,12 @@ contains
     var%B = var%f - var%q
   end subroutine solid_get_RHS
 
-  subroutine solid_bound_condition(mesh, param, var)
+  subroutine solid_bound_condition(mesh, param, var, monomat)
     implicit none
     type(meshdef) :: mesh
     type(paramdef) :: param
     type(vardef) :: var
+    type(monolis_structure) :: monomat
     integer(kint) :: i, in, dof, nb
     integer(kint), allocatable :: indexR(:), itemR(:), permA(:)
     real(kdouble) :: val
@@ -69,7 +71,7 @@ contains
       dof = param%ibound(2, nb)
       val = param%bound(nb) - var%u(n_dof*(in-1) + dof) - var%du(n_dof*(in-1) + dof)
       if(n_dof < dof) stop "*** error: 3 < dof"
-      call monolis_set_Dirichlet_bc_R(mat, var%B, in, dof, val)
+      call monolis_set_Dirichlet_bc_R(monomat, var%B, in, dof, val)
     enddo
   end subroutine solid_bound_condition
 end module mod_solid_matrix

@@ -9,13 +9,13 @@ program monolis_solid_l_static
   type(meshdef) :: mesh
   type(paramdef) :: param
   type(vardef) :: var
-  type(monolis_structure) :: mat
-  type(monolis_com) :: com
+  type(monolis_structure) :: monomat
+  type(monolis_com) :: monocom
   real(kdouble) :: t1, t2, t3, t4, t5, t6, t7
 
   call solid_set_debug_write(.true.)
 
-  call solid_init_global()
+  call solid_init_global(monomat, monocom)
   t1 = monolis_get_time()
 
   !> initialize part
@@ -29,20 +29,20 @@ program monolis_solid_l_static
   call solid_plot_time("input files", t2 - t1)
 
   call solid_init_mesh(mesh, var)
-  call solid_init_matrix(mesh)
+  call solid_init_matrix(mesh, monomat)
 
   t3 = monolis_get_time_global_sync()
   call solid_plot_time("nonzero-pattern detection", t3 - t2)
 
-  call solid_get_stiff_matrix(mesh, var, param)
+  call solid_get_stiff_matrix(mesh, var, param, monomat)
   call solid_load_condition(var, param)
   call solid_get_RHS(mesh, var)
-  call solid_bound_condition(mesh, param, var)
+  call solid_bound_condition(mesh, param, var, monomat)
 
   t4 = monolis_get_time_global_sync()
   call solid_plot_time("matrix generation", t4 - t3)
 
-  call solid_solver(mesh, var)
+  call solid_solver(mesh, var, monomat, monocom)
 
   t5 = monolis_get_time_global_sync()
   call solid_plot_time("solver", t5 - t4)
@@ -61,5 +61,5 @@ program monolis_solid_l_static
 
   !> finalize part
   call solid_finalize_mesh(mesh, var)
-  call solid_finalize_global()
+  call solid_finalize_global(monomat, monocom)
 end program monolis_solid_l_static
