@@ -36,7 +36,6 @@ program monolis_solid_l_dynamic
   t3 = monolis_get_time_global_sync()
   call solid_plot_time("nonzero-pattern detection", t3 - t2)
 
-
   do time_step = 1, param%n_time_step
     t3 = monolis_get_time_global_sync()
 
@@ -113,16 +112,16 @@ contains
     type(monolis_com) :: monocom
     real(kdouble), allocatable :: x1(:), x2(:)
 
-    !call monolis_copy_mat_nonzero_pattern_R(mat, Kmat)
-    !call monolis_copy_mat_nonzero_pattern_R(mat, Mmat)
+    call monolis_copy_mat_nonzero_pattern_R(mat, Kmat)
+    call monolis_copy_mat_nonzero_pattern_R(mat, Mmat)
 
-    !call get_stiff_matrix(mesh, var, param, Kmat)
-    !call get_mass_matrix(mesh, var, param, Mmat)
+    call solid_get_stiff_matrix(mesh, var, param, Kmat)
+    call solid_get_mass_matrix (mesh, var, param, Mmat)
 
     call get_matrix_for_dynamic_analysis(param%c2, Mmat, param%c1, Kmat, monomat)
 
-    !call monolis_alloc_R_1d(x1(n_dof*mesh%n_node))
-    !call monolis_alloc_R_1d(x2(n_dof*mesh%n_node))
+    call monolis_alloc_R_1d(x1, n_dof*mesh%n_node)
+    call monolis_alloc_R_1d(x2, n_dof*mesh%n_node)
 
     call get_RHS_temp_vector(mesh, var, param%a1, param%a2, param%a3, param%b1, param%b2, param%b3, x1, x2)
     call get_RHS_for_dynamic_analysis(mesh, var, Mmat, Kmat, param%Rm, param%Rk, x1, x2, monocom)

@@ -37,7 +37,7 @@ contains
     enddo
   end subroutine C3D8_stiff
 
-  subroutine C3D8_mass(mesh, var, param, icel, x, mass)
+  subroutine C3D8_mass(mesh, var, param, icel, mass)
     implicit none
     type(meshdef) :: mesh
     type(vardef) :: var
@@ -46,15 +46,23 @@ contains
     integer(kint) :: elem(8)
     real(kdouble) :: x(3,8), mass(24,24)
     real(kdouble) :: r(3), func(8), wg, det
-    real(kdouble) :: dndx(8,3)
+    real(kdouble) :: dndx(8,3), rho
 
     wg = 1.0d0
     mass = 0.0d0
+
+    do i = 1, 8
+      in = mesh%elem(i,icel)
+      x(1,i) = mesh%node(1,in)
+      x(2,i) = mesh%node(2,in)
+      x(3,i) = mesh%node(3,in)
+    enddo
+
     do i = 1, 8
       call monolis_C3D8_integral_point(i, r)
       call monolis_C3D8_shapefunc(r, func)
       call monolis_C3D8_get_global_deriv(x, r, dndx, det)
-!      call C3D8_Mmat(param, func, wg, det, mass)
+      call C3D8_Mmat(rho, func, wg, det, mass)
     enddo
   end subroutine C3D8_mass
 

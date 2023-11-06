@@ -15,7 +15,7 @@ contains
     integer(kint) :: elem(8)
     real(kdouble) :: stiff(24,24), x(3,8)
 
-    call solid_debug_header("get_stiff_matrix")
+    call solid_debug_header("solid_get_stiff_matrix")
     call monolis_clear_mat_value_R(monomat)
 
     do icel = 1, mesh%n_elem
@@ -24,6 +24,26 @@ contains
       call monolis_add_matrix_to_sparse_matrix_R(monomat, 8, elem, stiff)
     enddo
   end subroutine solid_get_stiff_matrix
+
+  subroutine solid_get_mass_matrix(mesh, var, param, monomat)
+    implicit none
+    type(meshdef) :: mesh
+    type(vardef) :: var
+    type(paramdef) :: param
+    type(monolis_structure) :: monomat
+    integer(kint) :: i, icel
+    integer(kint) :: elem(8)
+    real(kdouble) :: stiff(24,24), x(3,8)
+
+    call solid_debug_header("solid_get_mass_matrix")
+    call monolis_clear_mat_value_R(monomat)
+
+    do icel = 1, mesh%n_elem
+      call get_element_node_id(icel, mesh%n_base_func, mesh%elem, elem)
+      call C3D8_mass(mesh, var, param, icel, stiff)
+      call monolis_add_matrix_to_sparse_matrix_R(monomat, 8, elem, stiff)
+    enddo
+  end subroutine solid_get_mass_matrix
 
   subroutine solid_load_condition(var, param)
     implicit none
